@@ -63,6 +63,24 @@ Vec3.lerp = (a, b, t) => {
     ];
 }
 
+Vec3.squareDistance = (a) => {
+    return a[0]*a[0] + a[1]*a[1] + a[2]*a[2];
+}
+
+Vec3.distance = (a) => {
+    return Math.sqrt(Vec3.squareDistance(a));
+}
+
+Vec3.normalize = (a) => {
+    const magnitude = Vec3.distance(a);
+    if (magnitude == 0) return a; 
+    return [
+        a[0] / magnitude,
+        a[1] / magnitude,
+        a[2] / magnitude
+    ];
+}
+
 export function Vec4(x=0, y=0, z=0, w=0) {
     return [ x, y, z, w ];
 }

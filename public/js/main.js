@@ -5,24 +5,30 @@ import Camera from './webgl/camera.js';
 
 import { Vec3, Vec4 } from './math/vec.js';
 import Timer from './other/timer.js';
+import Input from './other/input.js';
+
+import Player from './game/player.js';
 
 const gameContainer = document.getElementById('game-container');
 
 const renderer = new Renderer(gameContainer.offsetWidth, gameContainer.offsetHeight);
-const camera = new Camera(gameContainer.offsetWidth / gameContainer.offsetHeight, 1);
+const camera = new Camera(gameContainer.offsetWidth / gameContainer.offsetHeight, 5);
 
 gameContainer.appendChild(renderer.canvas);
 
 window.addEventListener('resize', onResize);
 
-let material = null;
+let playerMaterial = null;
 
 const timer = new Timer(120, update, render);
 
-let position = Vec3(0, 0, 0);
+let player = null; 
+
+Input.init();
 
 Texture.load(renderer.gl, '../images/circle.png').then((tex) => {
-    material = new BasicMaterial(renderer.gl, tex, Vec4(0, 0, 0, 1));
+    playerMaterial = new BasicMaterial(renderer.gl, tex, Vec4(0, 0, 0, 1));
+    player = new Player(Vec3(0,0,0), playerMaterial);
 
     timer.start();
 });
@@ -32,14 +38,12 @@ function onResize() {
     camera.aspectRatio = gameContainer.offsetWidth / gameContainer.offsetHeight;
 }
 
-function update(deltatime) {
-    console.log(deltatime);
-
-    position[0] += deltatime;
+function update(dt) {
+    player.update(dt);
 }
 
 function render() {
     renderer.beginScene();
-    renderer.drawQuad(material, position, 0, Vec3(1, 1, 1));
+    player.render(renderer);
     renderer.endScene(camera);
 }
