@@ -9,6 +9,7 @@ export default class Timer {
 
     start() {
         this._lastUpdateTime = null;
+        this._onUpdate();
         this._updateIntervalID = setInterval(() => { this._onUpdate(); }, 1000 / this._updatesPerSecond);
         this._renderFrameID = requestAnimationFrame(() => { this._onRender(); });
     }

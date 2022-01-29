@@ -58,7 +58,8 @@ export default class Camera {
 
     screenToWorldPosition(screenPos) {
         let pos = Vec4(screenPos[0], screenPos[1], 0, 1);
-        let inv = Mat4.invert(this._viewProjectionMatrix);
+        let inv = Mat4.invert(this.viewProjectionMatrix);
+        
         pos = Vec4.transform(pos, inv);
 
         return Vec3(pos[0], pos[1], pos[2]);

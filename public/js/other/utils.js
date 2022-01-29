@@ -12,14 +12,14 @@ export default class Utils {
     }
 
     // Adapted from: https://stackoverflow.com/a/17130415/16787998
-    static mousePosOnCanvas(canvas, e) {
+    static mousePosOnCanvas(canvas, pos) {
         let rect = canvas.getBoundingClientRect();
         let scaleX = canvas.width / rect.width;
         let scaleY = canvas.height / rect.height;
 
         return Vec2(
-            (e.clientX - rect.left) * scaleX,
-            (e.clientY - rect.top) * scaleY
+            (pos[0] - rect.left) * scaleX,
+            (pos[1] - rect.top) * scaleY
         );
     }
 
