@@ -7,7 +7,7 @@ import Tank from './tank.js';
 
 export default class Player extends Tank {
     constructor(position=Vec3(0,0,0)) {
-        super(position);
+        super('player', position);
     }
 
     update(dt) {
@@ -30,5 +30,10 @@ export default class Player extends Tank {
         if (Input.getMouseButton(Input.MouseButton.LEFT)) {
             if (this._attemptShoot()) StatsManager.changeBar('xp', 1);
         }
+    }
+
+    _onHit(bullet) {
+        super._onHit(bullet);
+        StatsManager.changeBar('health', -1);
     }
 }

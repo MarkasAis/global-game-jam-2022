@@ -69,15 +69,18 @@ export default class Game {
         StatsManager.defineStat('playerMoveSpeed', new Stat('Player Move Speed', 5, '#84ff57'));
         StatsManager.defineStat('playerBulletSpeed', new Stat('Player Bullet Speed', 5, '#ff5757'));
 
-        StatsManager.defineBar('health', new Bar('Health', 10, 4, '#8d001f', '#ff0037', function() {
-            // console.log(this);
+        StatsManager.defineBar('health', new Bar('Health', 10, Game._player.health, '#8d001f', '#ff0037', function() {
+            if (this.value <= 0) {
+                this.setValue(0, false);
+                alert('u ded lol');
+            }
         }));
 
         StatsManager.defineBar('xp', new Bar('XP', 10, 0, '#7fad00', '#bf0', function() {
             if (this.value >= this.maxValue) {
                 let prevMaxValue = this.maxValue;
                 this.maxValue = Math.floor(1.1 * this.maxValue);
-                this.value -= prevMaxValue;
+                this.setValue(this._value - prevMaxValue, true);
                 Game._onLevelUp();
             }
         }));
@@ -105,6 +108,13 @@ export default class Game {
     static _update(dt) {
         for (let obj of Game._objects)
             obj.update(dt);
+
+        // Check collision for all pairs of objects
+        for (let i = 0; i < Game._objects.length; i++) {
+            for (let j = i+1; j < Game._objects.length; j++) {
+                Game._objects[i].colide(Game._objects[j]);
+            }
+        }
 
         // Camera follow
         Game._camera.position = Vec3.lerpClamped(Game._camera.position, Game._player.position, 5 * dt);

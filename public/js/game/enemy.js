@@ -4,7 +4,7 @@ import Game from "./game.js";
 
 export default class Enemy extends Tank {
     constructor(position=Vec3(0,0,0)) {
-        super(position, 2);
+        super('enemy', position, 2);
 
         this._seesPlayer = true;
         this._followRange = 2;

@@ -35,9 +35,9 @@ export class Bar {
     get foregroundColor() { return this._foregroundColor; }
 
     get value() { return this._value; }
-    set value(v) { 
+    setValue(v, callback=true) { 
         this._value = v;
-        if (this._changeCallback) this._changeCallback();
+        if (callback && this._changeCallback) this._changeCallback();
     }
 
     get maxValue() { return this._maxValue; }
@@ -191,7 +191,7 @@ export default class StatsManager {
 
     static changeBar(name, change=0) {
         let bar = StatsManager._bars[name];
-        bar.value += change;
+        bar.setValue(bar.value + change);
 
         let { fill, text } = StatsManager._barElements[name];
         fill.style.width = Maths.clamp(Math.round(100 * bar.percent), 0, 100) + '%';
