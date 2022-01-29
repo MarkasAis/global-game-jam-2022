@@ -15,7 +15,7 @@ export default class Tank {
         this._moveSpeed = 5;
         this._rotationSpeed = 5;
 
-        this._shotDelay = 0.1;
+        this._shootDelay = 0.1;
         this._bulletSpeed = 6;
         this._shotOffset = 0.5;
 

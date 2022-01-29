@@ -9,7 +9,7 @@ export default class Player extends Tank {
     constructor(position=Vec3(0,0,0)) {
         super(position);
 
-        this._lastShotTime = null;
+        this._shootCooldown = 0;
     }
 
     update(dt) {
@@ -28,10 +28,11 @@ export default class Player extends Tank {
         this._faceTowards(Game.mouseWorldPos);
 
         // Shooting
+        this._shootCooldown -= dt;
+
         if (Input.getMouseButton(Input.MouseButton.LEFT)) {
-            let time = Date.now() / 1000;
-            if (time - this._lastShotTime >= this._shotDelay) {
-                this._lastShotTime = time;
+            if (this._shootCooldown <= 0) {
+                this._shootCooldown = this._shootDelay;
                 this._shoot();
             }
         }

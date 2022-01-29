@@ -23,6 +23,9 @@ export default class Game {
 
     static _objects = [];
 
+    static _pauseAnimationTime = 0;
+    static _pauseSpeed = 1;
+
     static get renderer() { return Game._renderer; }
     static get mouseWorldPos() {
         return Game._camera.screenToWorldPosition(Input.getMousePosNormalized(Game._renderer.canvas));
@@ -60,8 +63,6 @@ export default class Game {
         StatsManager.init();
         StatsManager.defineStat('playerMoveSpeed', new Stat('Player Move Speed', 5, '#84ff57'));
         StatsManager.defineStat('playerBulletSpeed', new Stat('Player Bullet Speed', 5, '#ff5757'));
-
-        StatsManager.upgrade();
     }
 
     static _onResize() {
@@ -75,7 +76,13 @@ export default class Game {
         Game._gridMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('grid'));
         Game._player = Game.addObject(new Player(Vec3(0,0,0)));
         
-        Game._timer.start(); 
+        Game._timer.start();
+
+        Game._timer.transitionTimescale(0, 1, () => {
+            StatsManager.upgrade(() => {
+                Game._timer.transitionTimescale(1, 1);
+            });
+        });
     }
 
     static _update(dt) {
@@ -109,6 +116,7 @@ export default class Game {
                 Game._renderer.drawQuad(Game._gridMaterial, Vec3(x, y, 0), 0, Vec3(tileSize, tileSize, 1));
             }
         }
+
         for (let obj of Game._objects)
             obj.render();
 

@@ -24,6 +24,8 @@ export default class StatsManager {
     static _stats = {};
     static _statPointsElements = {};
 
+    static _closeCallback = null;
+
     static init() {
         // Selector
         StatsManager._selectionContainerElement = document.getElementById('selection-container');
@@ -64,7 +66,9 @@ export default class StatsManager {
         return this._stats[name].value;
     }
 
-    static upgrade() {
+    static upgrade(callback) {
+        StatsManager._closeCallback = callback;
+
         StatsManager._openSelection([
             {
                 'playerMoveSpeed': 5,
@@ -117,5 +121,9 @@ export default class StatsManager {
 
     static _closeSelection() {
         StatsManager._selectionContainerElement.classList.remove('visible');
+        if (StatsManager._closeCallback) {
+            StatsManager._closeCallback();
+            StatsManager._closeCallback = null;
+        }
     }
 }
