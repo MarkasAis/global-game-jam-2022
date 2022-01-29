@@ -10,6 +10,7 @@ import Maths from '../math/maths.js';
 import Player from './player.js';
 import AssetManager from '../other/assets.js';
 import StatsManager, { Stat, Bar } from './stats.js';
+import Enemy from './enemy.js';
 
 export default class Game {
     static _canvasContainer = null;
@@ -26,6 +27,7 @@ export default class Game {
     static _pauseSpeed = 1;
 
     static get renderer() { return Game._renderer; }
+    static get player() { return Game._player; }
     static get mouseWorldPos() {
         return Game._camera.screenToWorldPosition(Input.getMousePosNormalized(Game._renderer.canvas));
     }
@@ -59,6 +61,10 @@ export default class Game {
         Game._camera = new Camera(Game._canvasContainer.offsetWidth / Game._canvasContainer.offsetHeight, 3);
         Game._timer = new Timer(80, Game._update, Game._render);
 
+        Game._crosshairMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('crosshair'), Vec4(1, 1, 1, 1));
+        Game._gridMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('grid'));
+        Game._player = Game.addObject(new Player(Vec3(0,0,0)));
+
         StatsManager.init();
         StatsManager.defineStat('playerMoveSpeed', new Stat('Player Move Speed', 5, '#84ff57'));
         StatsManager.defineStat('playerBulletSpeed', new Stat('Player Bullet Speed', 5, '#ff5757'));
@@ -83,11 +89,8 @@ export default class Game {
     }
 
     static _start() {
-        Game._debugMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('circle'), Vec4(1, 0, 0, 1));
-        Game._crosshairMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('crosshair'), Vec4(1, 1, 1, 1));
-        Game._gridMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('grid'));
-        Game._player = Game.addObject(new Player(Vec3(0,0,0)));
-        
+        Game.addObject(new Enemy(Vec3(2, 2, 0)));
+
         Game._timer.start();
     }
 
@@ -108,13 +111,19 @@ export default class Game {
             
     }
 
+    static getCameraBounds() {
+        return {
+            min: Game._camera.screenToWorldPosition(Vec2(-1, -1)),
+            max: Game._camera.screenToWorldPosition(Vec2(1, 1))
+        }
+    }
+
     static _render() {
         Game._renderer.beginScene();
 
         // Draw background
         let tileSize = 7;
-        let minBound = Game._camera.screenToWorldPosition(Vec2(-1, -1));
-        let maxBound = Game._camera.screenToWorldPosition(Vec2(1, 1));
+        let { min: minBound, max: maxBound } = Game.getCameraBounds();
 
         minBound[0] = Maths.floorToNearest(minBound[0], tileSize);
         minBound[1] = Maths.floorToNearest(minBound[1], tileSize);

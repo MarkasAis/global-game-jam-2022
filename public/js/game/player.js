@@ -8,11 +8,11 @@ import Tank from './tank.js';
 export default class Player extends Tank {
     constructor(position=Vec3(0,0,0)) {
         super(position);
-
-        this._shootCooldown = 0;
     }
 
     update(dt) {
+        super.update(dt);
+
         // Update stats
         this._moveSpeed = StatsManager.getStat('playerMoveSpeed');
         this._bulletSpeed = StatsManager.getStat('playerBulletSpeed');
@@ -27,15 +27,8 @@ export default class Player extends Tank {
         this._move(input, dt);
         this._faceTowards(Game.mouseWorldPos);
 
-        // Shooting
-        this._shootCooldown -= dt;
-
         if (Input.getMouseButton(Input.MouseButton.LEFT)) {
-            if (this._shootCooldown <= 0) {
-                this._shootCooldown = this._shootDelay;
-                this._shoot();
-                StatsManager.changeBar('xp', 1);
-            }
+            if (this._attemptShoot()) StatsManager.changeBar('xp', 1);
         }
     }
 }

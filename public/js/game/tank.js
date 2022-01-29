@@ -7,28 +7,32 @@ import Maths from "../math/maths.js";
 import Game from './game.js';
 
 export default class Tank {
-    constructor(position=Vec3(0,0,0)) {
+    constructor(position=Vec3(0,0,0), hue=0) {
         this._position = position;
         this._baseRotation = 0;
         this._topRotation = 0;
 
-        this._moveSpeed = 5;
+        this._moveSpeed = 1;
         this._rotationSpeed = 5;
 
-        this._shootDelay = 0.1;
+        this._shootDelay = 0.75;
         this._bulletSpeed = 6;
         this._shotOffset = 0.5;
 
+        this._shootCooldown = 0;
+
         this._shadowMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('circle'), Vec4(0, 0, 0, 0.5));
-        this._baseMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('tank_base'));
-        this._topMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('tank_top'));
+        this._baseMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('tank_base'), Vec4(1, 1, 1, 1), hue);
+        this._topMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('tank_top'), Vec4(1, 1, 1, 1), hue);
     }
 
     get position() {
         return this._position;
     }
 
-    update(dt) { }
+    update(dt) {
+        this._shootCooldown -= dt;
+    }
 
     render() {
         Game.renderer.drawQuad(this._shadowMaterial, this._position, 0, Vec3(0.7, 0.7, 1));
@@ -63,5 +67,14 @@ export default class Tank {
         let shotPosition = Vec3.add(this._position, offset);
 
         Game.addObject(new Bullet(shotPosition, this._topRotation, this._bulletSpeed));
+    }
+
+    _attemptShoot() {
+        if (this._shootCooldown <= 0) {
+            this._shootCooldown = this._shootDelay;
+            this._shoot();
+            return true;
+        }
+        return false;
     }
 }
