@@ -4,6 +4,7 @@ import Maths from "../math/maths.js";
 
 export default class Input {
     static _keyStates = {};
+    static _mouseStates = {};
     static _mouseClientPos = Vec2(0, 0);
 
     static init() {
@@ -20,10 +21,22 @@ export default class Input {
         document.addEventListener('mousemove', e => {
             Input._mouseClientPos = Vec2(e.clientX, e.clientY);
         });
+
+        document.addEventListener('mousedown', e => {
+            Input._mouseStates[e.button] = true;
+        })
+
+        document.addEventListener('mouseup', e => {
+            Input._mouseStates[e.button] = false;
+        })
     }
 
-    static getKeyDown(key) {
+    static getKey(key) {
         return Input._keyStates[key] ? Input._keyStates[key] : false;
+    }
+
+    static getMouseButton(button) {
+        return Input._mouseStates[button] ? Input._mouseStates[button] : false;
     }
 
     static getMousePos(canvas) {
@@ -37,4 +50,9 @@ export default class Input {
             Maths.map(0, canvas.height, 1, -1, pos[1])
         );
     }
+}
+
+Input.MouseButton = {
+    LEFT: 0,
+    RIGHT: 2
 }

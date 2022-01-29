@@ -2,6 +2,7 @@ import Maths from "../math/maths.js";
 import { Vec3 } from "../math/vec.js";
 import Input from "../other/input.js";
 import Utils from "../other/utils.js";
+import Bullet from "./bullet.js";
 import Game from "./game.js";
 
 import Tank from './tank.js';
@@ -12,15 +13,18 @@ export default class Player extends Tank {
 
         this._moveSpeed = 5;
         this._rotationSpeed = 5;
+
+        this._shotDelay = 0.5;
+        this._bulletSpeed = 5;
+        this._lastShotTime = null;
     }
 
     update(dt) {
         let input = Vec3(0,0,0);
-
-        if (Input.getKeyDown('a')) input[0] -= 1;
-        if (Input.getKeyDown('d')) input[0] += 1;
-        if (Input.getKeyDown('s')) input[1] -= 1;
-        if (Input.getKeyDown('w')) input[1] += 1;
+        if (Input.getKey('a')) input[0] -= 1;
+        if (Input.getKey('d')) input[0] += 1;
+        if (Input.getKey('s')) input[1] -= 1;
+        if (Input.getKey('w')) input[1] += 1;
 
         if (input[0] != 0 || input[1] != 0) {
             let direction = Vec3.normalize(input);
@@ -40,5 +44,15 @@ export default class Player extends Tank {
         let targetPos = Game.mouseWorldPos;
         let deltaPos = Vec3.subtract(targetPos, this._position);
         this._topRotation = Math.atan2(deltaPos[1], deltaPos[0]);
+
+        // Shooting
+        if (Input.getMouseButton(Input.MouseButton.LEFT)) {
+            let time = Date.now() / 1000;
+            if (time - this._lastShotTime >= this._shotDelay) {
+                this._lastShotTime = time;
+                console.log('shot');
+                Game.addObject(new Bullet(Vec3.clone(this._position), this._topRotation, this._bulletSpeed));
+            }
+        }
     }
 }

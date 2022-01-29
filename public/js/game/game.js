@@ -19,6 +19,8 @@ export default class Game {
     static _player = null;
     static _debugMaterial = null;
 
+    static _objects = [];
+
     static get renderer() { return Game._renderer; }
     static get mouseWorldPos() {
         return Game._camera.screenToWorldPosition(Input.getMousePosNormalized(Game._renderer.canvas));
@@ -26,6 +28,11 @@ export default class Game {
 
     static init(container) {
         Game._setup(container).then(Game._start);
+    }
+
+    static addObject(obj) {
+        Game._objects.push(obj);
+        return obj;
     }
 
     static async _setup(container) {
@@ -55,20 +62,21 @@ export default class Game {
     static _start() {
         Game._debugMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('circle'), Vec4(1, 0, 0, 1));
         Game._crosshairMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('crosshair'), Vec4(0, 0, 0, 1));
-        Game._player = new Player(Vec3(0,0,0));
+        Game._player = Game.addObject(new Player(Vec3(0,0,0)));
         
         Game._timer.start(); 
     }
 
     static _update(dt) {
-        Game._mousePos = Game._camera.screenToWorldPosition(Input.getMousePosNormalized(Game._renderer.canvas));
-        Game._player.update(dt);
+        for (let obj of Game._objects)
+            obj.update(dt);
     }
 
     static _render() {
         Game._renderer.beginScene();
-        Game._player.render(Game._renderer);
 
+        for (let obj of Game._objects)
+            obj.render();
 
         Game._renderer.drawQuad(Game._crosshairMaterial, Game.mouseWorldPos, 0, Vec3(0.2, 0.2, 1));
 

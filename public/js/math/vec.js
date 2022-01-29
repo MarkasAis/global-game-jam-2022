@@ -81,6 +81,14 @@ Vec3.normalize = (a) => {
     ];
 }
 
+Vec3.clone = (a) => {
+    return [
+        a[0],
+        a[1],
+        a[2]
+    ]
+}
+
 export function Vec4(x=0, y=0, z=0, w=0) {
     return [ x, y, z, w ];
 }
