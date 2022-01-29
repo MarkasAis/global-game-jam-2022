@@ -6,27 +6,37 @@ import Collidable from "./collidable.js";
 import Game from './game.js';
 
 export default class Bullet extends Collidable { // TODO: fix self collision
-    constructor(type, position=Vec3(0,0,0), direction=0, speed=0) {
+    constructor(type, damage=1, penetration=1, position=Vec3(0,0,0), direction=0, speed=0) {
         super(position, 0.1, true);
+        this._type = type;
+        this._damage = damage;
+        this._penetration = penetration;
+
         this._direction = direction;
         this._speed = speed;
-
-        this._type = type;
 
         this._bulletMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('square'), Vec4(0.8, 0.8, 0.8, 1));
 
         this._hitsRegistered = [];
     }
 
+    get damage() { return this._damage; }
+
     registerHit(other) {
         if (other.type == this._type) return false;
 
         if (!this._hitsRegistered.includes(other)) {
             this._hitsRegistered.push(other);
+            this._penetration--;
+            if (this._penetration <= 0) this._onDestroy();
             return true;
         }
 
         return false;
+    }
+
+    _onDestroy() {
+        Game.removeObject(this);
     }
 
     update(dt) {

@@ -28,11 +28,12 @@ export default class Game {
 
     static RenderLayers = {
         BACKGROUND: -100,
-        DEAD: 0,
-        TANK_BASE: 1,
-        TANK_TOP: 2,
-        BULLET: 3,
-        OVERLAY: 4
+        SHADOW: 0,
+        DEAD: 1,
+        TANK_BASE: 2,
+        TANK_TOP: 3,
+        BULLET: 4,
+        OVERLAY: 5
     };
 
     static get renderer() { return Game._renderer; }
@@ -68,7 +69,8 @@ export default class Game {
             AssetManager.loadTexture(Game._renderer.gl, '../images/tank_base.png'),
             AssetManager.loadTexture(Game._renderer.gl, '../images/tank_top.png'),
             AssetManager.loadTexture(Game._renderer.gl, '../images/crosshair.png'),
-            AssetManager.loadTexture(Game._renderer.gl, '../images/grid.png')
+            AssetManager.loadTexture(Game._renderer.gl, '../images/grid.png'),
+            AssetManager.loadTexture(Game._renderer.gl, '../images/xp.png')
         ]);
 
         Game._camera = new Camera(Game._canvasContainer.offsetWidth / Game._canvasContainer.offsetHeight, 3);
@@ -80,8 +82,10 @@ export default class Game {
 
         StatsManager.init();
         StatsManager.defineStat('playerMoveSpeed', new Stat('Player Move Speed', 5, '#84ff57'));
-        StatsManager.defineStat('playerBulletSpeed', new Stat('Player Bullet Speed', 5, '#ff5757'));
         StatsManager.defineStat('playerShootRate', new Stat('Player Shoot Rate', 5, '#57ffc8'));
+        StatsManager.defineStat('playerBulletSpeed', new Stat('Player Bullet Speed', 5, '#ff5757'));
+        StatsManager.defineStat('playerBulletDamage', new Stat('Player Bullet Damage', 5, '#ff5757'));
+        StatsManager.defineStat('playerBulletPenetration', new Stat('Player Bullet Penetration', 5, '#ff5757'));
 
         StatsManager.defineBar('health', new Bar('Health', 10, Game._player.health, '#8d001f', '#ff0037', function() {
             if (this.value <= 0) {
@@ -90,7 +94,7 @@ export default class Game {
             }
         }));
 
-        StatsManager.defineBar('xp', new Bar('XP', 10, 0, '#7fad00', '#bf0', function() {
+        StatsManager.defineBar('xp', new Bar('XP', 10, 0, '#425900', '#bf0', function() {
             if (this.value >= this.maxValue) {
                 let prevMaxValue = this.maxValue;
                 this.maxValue = Math.floor(1.1 * this.maxValue);

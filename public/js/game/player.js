@@ -16,6 +16,8 @@ export default class Player extends Tank {
         // Update stats
         this._moveSpeed = StatsManager.getStat('playerMoveSpeed');
         this._bulletSpeed = StatsManager.getStat('playerBulletSpeed');
+        this._bulletDamage = StatsManager.getStat('playerBulletDamage');
+        this._bulletPenetration = StatsManager.getStat('playerBulletPenetration')+1;
         this._shootDelay = 1 / (StatsManager.getStat('playerShootRate')+1);
 
         // Movement
