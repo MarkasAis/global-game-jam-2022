@@ -50,6 +50,10 @@ export default class Maths {
 		return 1 - Maths.easeOutBounce(1 - x);
 	}
 
+    static easeOutExpo(x) {
+        return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+    }
+
     // Adapted from: https://stackoverflow.com/a/28037434/16787998
     static angleBetween(a, b) {
         let angle = (b - a + Math.PI) % (2*Math.PI) - Math.PI;

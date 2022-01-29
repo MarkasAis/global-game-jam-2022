@@ -9,6 +9,7 @@ class Material {
     static SHADER_CACHE = {};
     
     constructor (gl, name, source) {
+        this.gl = gl;
         this.shader = Material._getSharedShader(gl, name, source);
         this.name = name;
     }
@@ -26,17 +27,19 @@ class Material {
 }
 
 export class BasicMaterial extends Material {
-    constructor(gl, texture, tint=Vec4(1,1,1,1), hue=0) {
+    constructor(gl, texture, tint=Vec4(1,1,1,1), hue=0, saturation=1) {
         super(gl, 'basic', basicSource);
         this.texture = texture;
         this.tint = tint;
         this.hue = hue;
+        this.saturation = saturation;
     }
 
     apply() {
         this.texture.bind();
         this.shader.setFloat4('u_Tint', this.tint);
         this.shader.setFloat('u_Hue', this.hue);
+        this.shader.setFloat('u_Saturation', this.saturation);
     }
 }
 

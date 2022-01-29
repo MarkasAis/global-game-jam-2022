@@ -45,9 +45,17 @@ vec3 hueShift( vec3 color, float hueAdjust ){
     return vec3( dot (yIQ, kYIQToR), dot (yIQ, kYIQToG), dot (yIQ, kYIQToB) );
 }
 
+// https://github.com/CesiumGS/cesium/blob/main/Source/Shaders/Builtin/Functions/saturation.glsl
+vec3 czm_saturation( vec3 rgb, float adjustment ) {
+    const vec3 W = vec3(0.2125, 0.7154, 0.0721);
+    vec3 intensity = vec3(dot(rgb, W));
+    return mix(intensity, rgb, adjustment);
+}
+
 in vec2 v_TexCoord;
 
 uniform float u_Hue;
+uniform float u_Saturation;
 uniform vec4 u_Tint;
 uniform sampler2D u_Texture;
 
@@ -56,6 +64,7 @@ out vec4 o_Color;
 void main() {
     vec4 texCol = texture(u_Texture, v_TexCoord);
     vec3 shiftedCol = hueShift(vec3(texCol.xyz), u_Hue);
-    o_Color = vec4(shiftedCol.xyz, texCol.w) * u_Tint;
+    vec3 saturatedCol = czm_saturation(shiftedCol, u_Saturation);
+    o_Color = vec4(saturatedCol.xyz, texCol.w) * u_Tint;
 }
 `;

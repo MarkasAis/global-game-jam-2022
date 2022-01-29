@@ -36,6 +36,6 @@ export default class Bullet extends Collidable { // TODO: fix self collision
     }
 
     render() {
-        Game.renderer.drawQuad(this._bulletMaterial, this._position, 0, Vec3(0.1, 0.1, 1));
+        Game.renderer.drawQuad(this._bulletMaterial, this._position, 0, Vec3(0.1, 0.1, 1), Game.RenderLayers.BULLET);
     }
 }

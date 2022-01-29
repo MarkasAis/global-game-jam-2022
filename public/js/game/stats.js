@@ -148,7 +148,7 @@ export default class StatsManager {
             let decrease = Math.round(negative * Maths.random(0.1, 0.5));
             let increase = decrease;
 
-            decrease = Math.min(negative, decrease + Maths.randomInt(-1, 1));
+            decrease = Maths.clamp(decrease + Maths.randomInt(-1, 1), 0, negative);
             increase += Maths.randomInt(-1, 1);
 
             return [ increase, -decrease ];

@@ -9,8 +9,9 @@ class Renderer {
         this.canvas.height = height;
         this.gl = this.canvas.getContext('webgl2', { premultipliedAlpha: false, antialias: true });
         
-        // this.gl.enable(this.gl.DEPTH_TEST);
+        this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.enable(this.gl.BLEND);
+        this.gl.depthMask(false);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
         // Init Quad VAO
@@ -57,22 +58,37 @@ class Renderer {
         this.queue = [];
     }
 
-    endScene(camera) {
-        let groups = {};
-        for (let item of this.queue) {
-            if (!item.material) continue;
-            let shader = item.material.name;
+    _sortByDepth(items) {
+        items.sort((a, b) => {
+            return a.position[2] - b.position[2];
+        });
 
-            if (!groups[shader]) groups[shader] = [];
-            groups[shader].push(item);
+        let groups = [];
+        let curGroup = [];
+
+        for (let item of items) {
+            if (curGroup.length != 0 && curGroup[0].position[2] != item.position[2]) {
+                groups.push(curGroup);
+                curGroup = [];
+            }
+
+            curGroup.push(item);
         }
 
-        for (let items of Object.values(groups)) {
-            let shader = items[0].material.shader;
-            shader.bind();
-            shader.setMat4('u_ViewProjection', camera.viewProjectionMatrix);
+        if (curGroup.length > 0) groups.push(curGroup);
 
-            for (let item of items) {
+        return groups;
+    }
+
+    endScene(camera) {
+        let layers = this._sortByDepth(this.queue);
+
+        for (let layer of layers) {
+            for (let item of layer) {
+                let shader = item.material.shader;
+                shader.bind();
+                shader.setMat4('u_ViewProjection', camera.viewProjectionMatrix);
+
                 let transform = Mat4.scale(Mat4.rotateZ(Mat4.translation(item.position), item.rotation), item.size);
                 shader.setMat4('u_Transform', transform);
 
@@ -81,10 +97,35 @@ class Renderer {
                 this.gl.drawElements(this.gl.TRIANGLES, item.vao.ibo.count, this.gl.UNSIGNED_INT, 0);
             }
         }
+
+        // let groups = {};
+        // for (let item of this.queue) {
+        //     if (!item.material) continue;
+        //     let shader = item.material.name;
+
+        //     if (!groups[shader]) groups[shader] = [];
+        //     groups[shader].push(item);
+        // }
+
+        // for (let items of Object.values(groups)) {
+        //     let shader = items[0].material.shader;
+        //     shader.bind();
+        //     shader.setMat4('u_ViewProjection', camera.viewProjectionMatrix);
+
+        //     for (let item of items) {
+        //         let transform = Mat4.scale(Mat4.rotateZ(Mat4.translation(item.position), item.rotation), item.size);
+        //         shader.setMat4('u_Transform', transform);
+
+        //         item.material.apply();
+        //         item.vao.bind();
+        //         this.gl.drawElements(this.gl.TRIANGLES, item.vao.ibo.count, this.gl.UNSIGNED_INT, 0);
+        //     }
+        // }
     }
 
-    drawQuad(material, position=Vec3(0,0,0), rotation=0, size=Vec3(1,1,1)) {
-        this.queue.push({ material, position, rotation, size, vao: this.quadVAO });
+    drawQuad(material, position=Vec3(0,0,0), rotation=0, size=Vec3(1,1,1), z) {
+        let adjustedPosition = z != undefined ? Vec3(position[0], position[1], z) : position;
+        this.queue.push({ material, position: adjustedPosition, rotation, size, vao: this.quadVAO });
     }
 }
 

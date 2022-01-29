@@ -21,10 +21,19 @@ export default class Game {
     static _player = null;
     static _debugMaterial = null;
 
-    static _objects = [];
+    static _objects = new Set();
 
     static _pauseAnimationTime = 0;
     static _pauseSpeed = 1;
+
+    static RenderLayers = {
+        BACKGROUND: -100,
+        DEAD: 0,
+        TANK_BASE: 1,
+        TANK_TOP: 2,
+        BULLET: 3,
+        OVERLAY: 4
+    };
 
     static get renderer() { return Game._renderer; }
     static get player() { return Game._player; }
@@ -37,8 +46,12 @@ export default class Game {
     }
 
     static addObject(obj) {
-        Game._objects.push(obj);
+        Game._objects.add(obj);
         return obj;
+    }
+
+    static removeObject(obj) {
+        return Game._objects.delete(obj);
     }
 
     static async _setup() {
@@ -68,11 +81,12 @@ export default class Game {
         StatsManager.init();
         StatsManager.defineStat('playerMoveSpeed', new Stat('Player Move Speed', 5, '#84ff57'));
         StatsManager.defineStat('playerBulletSpeed', new Stat('Player Bullet Speed', 5, '#ff5757'));
+        StatsManager.defineStat('playerShootRate', new Stat('Player Shoot Rate', 5, '#57ffc8'));
 
         StatsManager.defineBar('health', new Bar('Health', 10, Game._player.health, '#8d001f', '#ff0037', function() {
             if (this.value <= 0) {
                 this.setValue(0, false);
-                alert('u ded lol');
+                // alert('u ded lol');
             }
         }));
 
@@ -109,10 +123,11 @@ export default class Game {
         for (let obj of Game._objects)
             obj.update(dt);
 
+        let objects = Array.from(Game._objects.values());
         // Check collision for all pairs of objects
-        for (let i = 0; i < Game._objects.length; i++) {
-            for (let j = i+1; j < Game._objects.length; j++) {
-                Game._objects[i].colide(Game._objects[j]);
+        for (let i = 0; i < objects.length; i++) {
+            for (let j = i+1; j < objects.length; j++) {
+                objects[i].colide(objects[j]);
             }
         }
 
@@ -147,14 +162,14 @@ export default class Game {
 
         for (let x = startX; x <= endX; x += tileSize) {
             for (let y = startY; y <= endY; y += tileSize) {
-                Game._renderer.drawQuad(Game._gridMaterial, Vec3(x, y, 0), 0, Vec3(tileSize, tileSize, 1));
+                Game._renderer.drawQuad(Game._gridMaterial, Vec3(x, y, 0), 0, Vec3(tileSize, tileSize, 1), Game.RenderLayers.BACKGROUND);
             }
         }
 
         for (let obj of Game._objects)
             obj.render();
 
-        Game._renderer.drawQuad(Game._crosshairMaterial, Game.mouseWorldPos, 0, Vec3(0.2, 0.2, 1));
+        Game._renderer.drawQuad(Game._crosshairMaterial, Game.mouseWorldPos, 0, Vec3(0.2, 0.2, 1), Game.RenderLayers.OVERLAY);
 
         Game._renderer.endScene(Game._camera);
     }

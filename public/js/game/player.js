@@ -16,6 +16,7 @@ export default class Player extends Tank {
         // Update stats
         this._moveSpeed = StatsManager.getStat('playerMoveSpeed');
         this._bulletSpeed = StatsManager.getStat('playerBulletSpeed');
+        this._shootDelay = 1 / (StatsManager.getStat('playerShootRate')+1);
 
         // Movement
         let input = Vec3(0,0,0);
@@ -28,7 +29,7 @@ export default class Player extends Tank {
         this._faceTowards(Game.mouseWorldPos);
 
         if (Input.getMouseButton(Input.MouseButton.LEFT)) {
-            if (this._attemptShoot()) StatsManager.changeBar('xp', 1);
+            this._attemptShoot();
         }
     }
 

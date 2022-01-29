@@ -6,6 +6,7 @@ import Maths from "../math/maths.js";
 
 import Game from './game.js';
 import Collidable from "./collidable.js";
+import Particle from "./particle.js";
 
 export default class Tank extends Collidable {
     constructor(type, position=Vec3(0,0,0), hue=0) {
@@ -39,9 +40,9 @@ export default class Tank extends Collidable {
     }
 
     render() {
-        Game.renderer.drawQuad(this._shadowMaterial, this._position, 0, Vec3(0.7, 0.7, 1));
-        Game.renderer.drawQuad(this._baseMaterial, this._position, this._baseRotation);
-        Game.renderer.drawQuad(this._topMaterial, this._position, this._topRotation);
+        // Game.renderer.drawQuad(this._shadowMaterial, this._position, 0, Vec3(0.7, 0.7, 1));
+        Game.renderer.drawQuad(this._baseMaterial, this._position, this._baseRotation, Vec3(1, 1, 1), Game.RenderLayers.TANK_BASE);
+        Game.renderer.drawQuad(this._topMaterial, this._position, this._topRotation, Vec3(1, 1, 1), Game.RenderLayers.TANK_TOP);
     }
 
     _onCollision(other) {
@@ -53,13 +54,35 @@ export default class Tank extends Collidable {
     }
 
     _onHit(bullet) {
-        console.log('hit');
         this._health = Math.max(0, this._health - 1);
         if (this._health <= 0) this._onDeath();
     }
 
     _onDeath() {
-        console.log('dead');
+        Game.removeObject(this);
+
+        const randomOffset = (magnitude=1) => {
+            let angle = Maths.random(0, Math.PI*2);
+            return Vec3(Math.cos(angle) * magnitude, Math.sin(angle) * magnitude, 0);
+        }
+
+        Game.addObject(new Particle(
+            new BasicMaterial(this._baseMaterial.gl, this._baseMaterial.texture, this._baseMaterial.tint, this._baseMaterial.hue, 0),
+            Game.RenderLayers.DEAD, 1, 
+            Vec3.clone(this._position), Vec3.add(this._position, randomOffset(0.5)),
+            this._topRotation, this._topRotation + Maths.random(-Math.PI, Math.PI),
+            Vec3(1, 1, 1), Vec3(1, 1, 1),
+            Maths.easeOutExpo
+        ));
+
+        Game.addObject(new Particle(
+            new BasicMaterial(this._topMaterial.gl, this._topMaterial.texture, this._topMaterial.tint, this._topMaterial.hue, 0),
+            Game.RenderLayers.DEAD, 1, 
+            Vec3.clone(this._position), Vec3.add(this._position, randomOffset(1)),
+            this._topRotation, this._topRotation + Maths.random(-Math.PI, Math.PI),
+            Vec3(1, 1, 1), Vec3(0.9, 0.9, 1),
+            Maths.easeOutExpo
+        ));
     }
 
     _move(direction, dt) {
