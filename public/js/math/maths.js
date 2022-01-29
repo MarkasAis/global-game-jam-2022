@@ -3,6 +3,13 @@ export default class Maths {
         return this.lerp(min, max, Math.random());
     }
 
+    // Adapted from: https://stackoverflow.com/a/1527820/16787998
+    static randomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max) + 1;
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
     static lerp(a, b, t) {
         return (b - a) * t + a;
     }

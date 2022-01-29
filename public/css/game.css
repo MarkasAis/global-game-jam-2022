@@ -117,6 +117,7 @@ canvas {
 
 #stat-names-container > div, #stat-points-container > * {
     margin-bottom: 10px;
+    height: 20px;
 }
 
 #stat-points-container > * > * {

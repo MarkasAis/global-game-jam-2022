@@ -32,4 +32,10 @@ export default class Utils {
 
         return arr;
     }
+
+    static randomSample(arr, n) {
+        let shuffled = [...arr];
+        shuffled.sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, n);
+    }
 }

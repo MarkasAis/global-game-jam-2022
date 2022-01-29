@@ -1,4 +1,5 @@
 import Maths from "../math/maths.js";
+import Utils from "../other/utils.js";
 
 export class Stat {
     constructor(name, startingValue, color) {
@@ -139,17 +140,36 @@ export default class StatsManager {
 
     static upgrade(callback) {
         StatsManager._closeCallback = callback;
+        StatsManager._openSelection(StatsManager._choseUpgradeOptions());
+    }
 
-        StatsManager._openSelection([
-            {
-                'playerMoveSpeed': 5,
-                'playerBulletSpeed': -3
-            },
-            {
-                'playerBulletSpeed': 4,
-                'playerMoveSpeed': -2
-            }
-        ]);
+    static _choseUpgradeOptions(expectedIncrease) {
+        const generateExchange = (positive, negative) => {
+            let decrease = Math.round(negative * Maths.random(0.1, 0.5));
+            let increase = decrease;
+
+            decrease = Math.min(negative, decrease + Maths.randomInt(-1, 1));
+            increase += Maths.randomInt(-1, 1);
+
+            return [ increase, -decrease ];
+        }
+
+        let stats = Object.entries(StatsManager._stats);
+        let option1 = Utils.randomSample(stats, 2);
+        let option2 = Utils.randomSample(stats, 2);
+
+        let exchange1 = generateExchange(option1[0][1].value, option1[1][1].value);
+        let exchange2 = generateExchange(option2[0][1].value, option2[1][1].value);
+
+        let selection1 = {};
+        selection1[option1[0][0]] = exchange1[0];
+        selection1[option1[1][0]] = exchange1[1];
+
+        let selection2 = {};
+        selection2[option2[0][0]] = exchange2[0];
+        selection2[option2[1][0]] = exchange2[1];
+
+        return [ selection1, selection2 ];
     }
 
     static _changeStat(name, change=0) {
