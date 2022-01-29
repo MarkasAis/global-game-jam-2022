@@ -16,12 +16,16 @@ export default class Tank {
         this._rotationSpeed = 5;
 
         this._shotDelay = 0.1;
-        this._bulletSpeed = 5;
+        this._bulletSpeed = 6;
         this._shotOffset = 0.5;
 
         this._shadowMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('circle'), Vec4(0, 0, 0, 0.5));
         this._baseMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('tank_base'));
         this._topMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('tank_top'));
+    }
+
+    get position() {
+        return this._position;
     }
 
     update(dt) { }

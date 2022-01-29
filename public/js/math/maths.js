@@ -44,4 +44,12 @@ export default class Maths {
         let angle = (b - a + Math.PI) % (2*Math.PI) - Math.PI;
         return angle < -Math.PI ? angle + 2*Math.PI : angle;
     }
+
+    static floorToNearest(x, n) {
+        return n * Math.floor(x / n);
+    }
+
+    static ceilToNearest(x, n) {
+        return n * Math.ceil(x / n);
+    }
 }
