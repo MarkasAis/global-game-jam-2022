@@ -11,6 +11,8 @@ canvas {
     cursor: none;
 }
 
+/* ##################### Selection ##################### */
+
 #selection-container {
     position: fixed;
     top: 50%;
@@ -95,3 +97,44 @@ canvas {
     padding: 30px 10px;
     font-size: 40px;
 }
+
+/* ##################### Stats ##################### */
+
+#stats-container {
+    position: fixed;
+    left: 15px;
+    bottom: 15px;
+
+    display: flex;
+}
+
+/* .stat {
+    color: white;
+    font-family: 'pixelated';
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.stat-name, .stat-points {
+    display: inline;
+} */
+
+#stat-names-container {
+    color: white;
+    font-family: 'pixelated';
+    font-size: 20px;
+    margin-right: 20px;
+}
+
+#stat-names-container > div, #stat-points-container > * {
+    margin-bottom: 10px;
+}
+
+#stat-points-container > * > * {
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    display: inline-block;
+    margin-right: 10px;
+}
+

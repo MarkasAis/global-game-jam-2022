@@ -10,7 +10,7 @@ import Maths from '../math/maths.js';
 
 import Player from './player.js';
 import AssetManager from '../other/assets.js';
-import StatsManager from './stats.js';
+import StatsManager, { Stat } from './stats.js';
 
 export default class Game {
     static _canvasContainer = null;
@@ -55,10 +55,13 @@ export default class Game {
         ]);
 
         Game._camera = new Camera(Game._canvasContainer.offsetWidth / Game._canvasContainer.offsetHeight, 3);
-        Game._timer = new Timer(120, Game._update, Game._render);
+        Game._timer = new Timer(80, Game._update, Game._render);
 
         StatsManager.init();
-        // StatsManager.upgrade();
+        StatsManager.defineStat('playerMoveSpeed', new Stat('Player Move Speed', 5, '#84ff57'));
+        StatsManager.defineStat('playerBulletSpeed', new Stat('Player Bullet Speed', 5, '#ff5757'));
+
+        StatsManager.upgrade();
     }
 
     static _onResize() {
