@@ -108,17 +108,6 @@ canvas {
     display: flex;
 }
 
-/* .stat {
-    color: white;
-    font-family: 'pixelated';
-    font-size: 20px;
-    margin-bottom: 10px;
-}
-
-.stat-name, .stat-points {
-    display: inline;
-} */
-
 #stat-names-container {
     color: white;
     font-family: 'pixelated';
@@ -138,3 +127,47 @@ canvas {
     margin-right: 10px;
 }
 
+/* ##################### Bars ##################### */
+
+#bars-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#bars-container > * {
+    width: 700px;
+    height: 40px;
+    
+    margin-bottom: 20px;
+    border: 6px solid white;
+    box-sizing: border-box;
+    background-color: rgb(124, 124, 124);
+    font-family: 'pixelated';
+    font-size: 20px;
+    color: white;
+    
+    position: relative;
+}
+
+.bar-fill {
+    height: 100%;
+    width: 0%;
+    position: absolute;
+    background-color: rgb(226, 226, 226);
+}
+
+.bar-text {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    margin-left: 20px;
+
+    font-size: 23px;
+    text-shadow: 1px  1px 1px rgba(0, 0, 0, 0.4),
+                 1px -1px 1px rgba(0, 0, 0, 0.4), 
+                -1px -1px 1px rgba(0, 0, 0, 0.4), 
+                -1px  1px 1px rgba(0, 0, 0, 0.4);
+}

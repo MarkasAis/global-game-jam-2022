@@ -1,8 +1,15 @@
+import Maths from "../math/maths.js";
+
 export class Stat {
     constructor(name, startingValue, color) {
         this._name = name;
-        this.value = startingValue;
+        this._value = startingValue;
         this._color = color;
+    }
+
+    get value() { return this._value; }
+    set value(v) {
+        this._value = Math.max(v, 0);
     }
 
     get name() { return this._name; }
@@ -10,6 +17,37 @@ export class Stat {
 
     changeMessage(value) {
         return value + ' ' + this._name;
+    }
+}
+
+export class Bar {
+    constructor(name, maxValue, startingValue, backgroundColor, foregroundColor, changeCallback) {
+        this._name = name;
+        this._maxValue = maxValue;
+        this._value = startingValue;
+        this._backgroundColor = backgroundColor;
+        this._foregroundColor = foregroundColor;
+        this._changeCallback = changeCallback;
+    }
+
+    get backgroundColor() { return this._backgroundColor; }
+    get foregroundColor() { return this._foregroundColor; }
+
+    get value() { return this._value; }
+    set value(v) { 
+        this._value = v;
+        if (this._changeCallback) this._changeCallback();
+    }
+
+    get maxValue() { return this._maxValue; }
+    set maxValue(v) { this._maxValue = v; }
+
+    get percent() {
+        return this._value / this._maxValue;
+    }
+
+    get text() {
+        return `${this._name} ${this._value}/${this._maxValue}`;
     }
 }
 
@@ -23,6 +61,11 @@ export default class StatsManager {
 
     static _stats = {};
     static _statPointsElements = {};
+
+    static _barsContainerElement = null;
+
+    static _bars = {};
+    static _barElements = {};
 
     static _closeCallback = null;
 
@@ -46,6 +89,9 @@ export default class StatsManager {
         // Stats
         StatsManager._statNamesContainerElement = document.getElementById('stat-names-container');
         StatsManager._statPointsContainer = document.getElementById('stat-points-container');
+
+        // Bars
+        StatsManager._barsContainerElement = document.getElementById('bars-container');
     }
 
     static defineStat(name, stat) {
@@ -64,6 +110,31 @@ export default class StatsManager {
 
     static getStat(name) {
         return this._stats[name].value;
+    }
+
+    static defineBar(name, bar) {
+        this._bars[name] = bar;
+
+        let barElement = document.createElement('div');
+        barElement.style.backgroundColor = bar.backgroundColor;
+
+        let barFill = document.createElement('div');
+        barFill.classList.add('bar-fill');
+        barFill.style.backgroundColor = bar.foregroundColor;
+        barElement.appendChild(barFill);
+
+        let barText = document.createElement('div');
+        barText.classList.add('bar-text');
+        barElement.appendChild(barText);
+        
+        StatsManager._barsContainerElement.appendChild(barElement);
+
+        StatsManager._barElements[name] = {
+            fill: barFill,
+            text: barText
+        };
+
+        StatsManager.changeBar(name);
     }
 
     static upgrade(callback) {
@@ -85,15 +156,27 @@ export default class StatsManager {
         let stat = StatsManager._stats[name];
         stat.value += change;
 
-        let pointsElement = this._statPointsElements[name];
-        while (pointsElement.children.length > stat.value) 
+        let pointsElement = StatsManager._statPointsElements[name];
+        let value = Math.max(stat.value, 0);
+
+        while (pointsElement.children.length > value) 
             pointsElement.removeChild(pointsElement.lastChild);
 
-        while (pointsElement.children.length < stat.value) {
+        while (pointsElement.children.length < value) {
             let point = document.createElement('div');
             point.style.backgroundColor = stat.color;
             pointsElement.appendChild(point);
         }
+    }
+
+    static changeBar(name, change=0) {
+        let bar = StatsManager._bars[name];
+        bar.value += change;
+
+        let { fill, text } = StatsManager._barElements[name];
+        fill.style.width = Maths.clamp(Math.round(100 * bar.percent), 0, 100) + '%';
+
+        text.innerHTML = bar.text;
     }
 
     static _populateOptions(options) {

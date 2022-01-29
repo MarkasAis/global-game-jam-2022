@@ -1,5 +1,4 @@
 import Renderer from '../webgl/renderer.js';
-import Texture from '../webgl/texture.js';
 import { BasicMaterial } from '../webgl/material.js';
 import Camera from '../webgl/camera.js';
 
@@ -10,7 +9,7 @@ import Maths from '../math/maths.js';
 
 import Player from './player.js';
 import AssetManager from '../other/assets.js';
-import StatsManager, { Stat } from './stats.js';
+import StatsManager, { Stat, Bar } from './stats.js';
 
 export default class Game {
     static _canvasContainer = null;
@@ -63,6 +62,19 @@ export default class Game {
         StatsManager.init();
         StatsManager.defineStat('playerMoveSpeed', new Stat('Player Move Speed', 5, '#84ff57'));
         StatsManager.defineStat('playerBulletSpeed', new Stat('Player Bullet Speed', 5, '#ff5757'));
+
+        StatsManager.defineBar('health', new Bar('Health', 10, 4, '#8d001f', '#ff0037', function() {
+            // console.log(this);
+        }));
+
+        StatsManager.defineBar('xp', new Bar('XP', 10, 0, '#7fad00', '#bf0', function() {
+            if (this.value >= this.maxValue) {
+                let prevMaxValue = this.maxValue;
+                this.maxValue = Math.floor(1.1 * this.maxValue);
+                this.value -= prevMaxValue;
+                Game._onLevelUp();
+            }
+        }));
     }
 
     static _onResize() {
@@ -77,7 +89,9 @@ export default class Game {
         Game._player = Game.addObject(new Player(Vec3(0,0,0)));
         
         Game._timer.start();
+    }
 
+    static _onLevelUp() {
         Game._timer.transitionTimescale(0, 1, () => {
             StatsManager.upgrade(() => {
                 Game._timer.transitionTimescale(1, 1);
@@ -90,7 +104,8 @@ export default class Game {
             obj.update(dt);
 
         // Camera follow
-        Game._camera.position = Vec3.lerp(Game._camera.position, Game._player.position, 5 * dt);
+        Game._camera.position = Vec3.lerpClamped(Game._camera.position, Game._player.position, 5 * dt);
+            
     }
 
     static _render() {

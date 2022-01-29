@@ -63,16 +63,28 @@ Vec3.lerp = (a, b, t) => {
     ];
 }
 
-Vec3.squareDistance = (a) => {
+Vec3.lerpClamped = (a, b, t) => {
+    return [
+        Maths.lerpClamped(a[0], b[0], t),
+        Maths.lerpClamped(a[1], b[1], t),
+        Maths.lerpClamped(a[2], b[2], t)
+    ];
+}
+
+Vec3.squareMagnitude = (a) => {
     return a[0]*a[0] + a[1]*a[1] + a[2]*a[2];
 }
 
-Vec3.distance = (a) => {
-    return Math.sqrt(Vec3.squareDistance(a));
+Vec3.magnitude = (a) => {
+    return Math.sqrt(Vec3.squareMagnitude(a));
 }
 
+Vec3.distance = (a, b) => {
+    return Vec3.magnitude(Vec3.subtract(a, b));
+} 
+
 Vec3.normalize = (a) => {
-    const magnitude = Vec3.distance(a);
+    const magnitude = Vec3.magnitude(a);
     if (magnitude == 0) return a; 
     return [
         a[0] / magnitude,

@@ -34,6 +34,7 @@ export default class Player extends Tank {
             if (this._shootCooldown <= 0) {
                 this._shootCooldown = this._shootDelay;
                 this._shoot();
+                StatsManager.changeBar('xp', 1);
             }
         }
     }

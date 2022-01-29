@@ -7,6 +7,10 @@ export default class Maths {
         return (b - a) * t + a;
     }
 
+    static lerpClamped(a, b, t) {
+        return Maths.lerp(a, b, Maths.clamp(t, 0, 1));
+    }
+
     static inverseLerp(a, b, v) {
         return (v - a) / (b - a);
     }
