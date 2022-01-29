@@ -1,8 +1,10 @@
 export default class Timer {
-    constructor(updatesPerSecond, updateCallback, renderCallback) {
+    constructor(updatesPerSecond, updateCallback, renderCallback, timeScale=1) {
         this._updatesPerSecond = updatesPerSecond;
         this._updateCallback = updateCallback;
         this._renderCallback = renderCallback;
+
+        this.timeScale = timeScale;
 
         this._lastUpdateTime = null;
     }
@@ -24,7 +26,7 @@ export default class Timer {
         let deltatime = this._lastUpdateTime != null ? (time - this._lastUpdateTime) : 0;
         this._lastUpdateTime = time;
 
-        this._updateCallback(deltatime);
+        this._updateCallback(deltatime * this.timeScale);
     }
 
     _onRender() {
