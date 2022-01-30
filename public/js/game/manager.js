@@ -279,16 +279,16 @@ export default class GameManager {
         }
 
         // n- p-
-        else if (!stats[0].positive && stats[1].positive) {
-            let maxDecrease = Math.min(stats[0].value, stats[1].value)-1;
-            let decreasePositive =  Math.round(EXCHANGE_PERCENT * maxDecrease);
+        // else if (!stats[0].positive && stats[1].positive) {
+        //     let maxDecrease = Math.min(stats[0].value, stats[1].value)-1;
+        //     let decreasePositive =  Math.round(EXCHANGE_PERCENT * maxDecrease);
 
-            let decreaseNegative = decreasePositive + Maths.randomInt(-1, 1);
-            if (stats[0] - decreaseNegative < 1) decreaseNegative--;
+        //     let decreaseNegative = decreasePositive + Maths.randomInt(-1, 1);
+        //     if (stats[0] - decreaseNegative < 1) decreaseNegative--;
 
-            changes[0] = -decreaseNegative;
-            changes[1] = -decreasePositive;
-        }
+        //     changes[0] = -decreaseNegative;
+        //     changes[1] = -decreasePositive;
+        // }
 
         // n- n+
         else {
