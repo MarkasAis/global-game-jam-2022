@@ -25,12 +25,19 @@ export default class Tank extends Collidable {
         this._shotOffset = 0.5;
         this._shootCooldown = 0;
 
-        this._health = 10;
+        this._maximumHealth = 10;
+        this._health = this._maximumHealth;
         this._type = type;
 
         this._shadowMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('circle'), Vec4(0, 0, 0, 0.5));
-        this._baseMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('tank_base'), Vec4(1, 1, 1, 1), hue);
-        this._topMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('tank_top'), Vec4(1, 1, 1, 1), hue);
+        this._baseMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('tank_base'), Vec4(1, 1, 1, 1), hue, 2);
+        this._topMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('tank_top'), Vec4(1, 1, 1, 1), hue, 2);
+    }
+
+    set maximumHealth(v) {
+        if (this._maximumHealth < v) this._health += v - this._maximumHealth;
+        this._maximumHealth = v;
+        this._health = Math.min(this._health, this._maximumHealth);
     }
 
     get position() { return this._position; }

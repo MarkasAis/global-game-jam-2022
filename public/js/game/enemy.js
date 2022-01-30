@@ -1,14 +1,16 @@
 import Tank from "./tank.js";
 import { Vec3, Vec4 } from "../math/vec.js";
 import Game from "./game.js";
-import StatsManager from "./stats.js";
+import GameManager from "./manager.js";
 import AssetManager from "../other/assets.js";
 import Particle from "./particle.js";
 import { BasicMaterial } from "../webgl/material.js";
+import Maths from "../math/maths.js";
+import ScoreManager from "./score.js";
 
 export default class Enemy extends Tank {
     constructor(position=Vec3(0,0,0)) {
-        super('enemy', position, 2);
+        super('enemy', position, Maths.random(-2, 2));
 
         this._seesPlayer = true;
         this._followRange = 2;
@@ -33,7 +35,8 @@ export default class Enemy extends Tank {
 
     _onDeath() {
         super._onDeath();
-        StatsManager.changeBar('xp', 1);
+        GameManager.setBar('xp', GameManager.getBar('xp').value + 1);
+        ScoreManager.increaseScore(1);
 
         Game.addObject(new Particle(
             new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('xp'), Vec4(1, 1, 1, 1)),

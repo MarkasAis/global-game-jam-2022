@@ -3,6 +3,14 @@
   src: url('../fonts/pixelated.ttf');
 }
 
+:root {
+  --primary-bright: #00abff;
+  --secondary-bright: #ff0037;
+
+  --primary-dark: #004364;
+  --secondary-dark: #550012;
+}
+
 html, body {
   margin: 0;
   background-color: #151515;

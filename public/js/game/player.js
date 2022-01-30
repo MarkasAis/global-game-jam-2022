@@ -1,7 +1,7 @@
 import { Vec3 } from "../math/vec.js";
 import Input from "../other/input.js";
 import Game from "./game.js";
-import StatsManager from "./stats.js";
+import GameManager from "./manager.js";
 
 import Tank from './tank.js';
 
@@ -14,11 +14,15 @@ export default class Player extends Tank {
         super.update(dt);
 
         // Update stats
-        this._moveSpeed = StatsManager.getStat('playerMoveSpeed');
-        this._bulletSpeed = StatsManager.getStat('playerBulletSpeed');
-        this._bulletDamage = StatsManager.getStat('playerBulletDamage');
-        this._bulletPenetration = StatsManager.getStat('playerBulletPenetration')+1;
-        this._shootDelay = 1 / (StatsManager.getStat('playerShootRate')+1);
+        this._moveSpeed = GameManager.getStat('playerMoveSpeed');
+        this._bulletSpeed = GameManager.getStat('playerBulletSpeed');
+        this._bulletDamage = GameManager.getStat('playerBulletDamage');
+        this._bulletPenetration = GameManager.getStat('playerBulletPenetration')+1;
+        this._shootDelay = 1 / (GameManager.getStat('playerShootRate')+1);
+
+        this.maximumHealth = GameManager.getStat('playerMaxHealth');
+
+        GameManager.setBar('health', this._health, this._maximumHealth);
 
         // Movement
         let input = Vec3(0,0,0);
@@ -37,6 +41,11 @@ export default class Player extends Tank {
 
     _onHit(bullet) {
         super._onHit(bullet);
-        StatsManager.changeBar('health', -1);
+        GameManager.setBar('health', this._health, this._maximumHealth);
+    }
+
+    _onDeath() {
+        super._onDeath();
+        Game.finish();
     }
 }

@@ -9,19 +9,30 @@
     <link rel="stylesheet" href="css/game.css">
 </head>
 <body>
+    <div id="overlay"></div>
+
+    <div id="end-screen-container">
+        <div id="end-screen-message">Game Over</div>
+        <div id="end-screen-score">Score: 5 546 468</div>
+        <div id="end-screen-buttons">
+            <div id="play-again" class="option option-1">Play Again</div>
+            <div id="main-menu" class="option option-2">Main Menu</div>
+        </div>
+    </div>
+
     <div id="selection-container">
         <div id="selection-message">Would you rather?</div>
         <div id="selection-options-container">
             <div class="option option-1">
-                <div class="positive">+3 Bullet Speed</div>
+                <div class="positive"></div>
                 <div class="but">BUT</div>
-                <div class="negative">-5 Movement Speed</div>
+                <div class="negative"></div>
             </div>
             <div class="or">OR</div>
             <div class="option option-2">
-                <div class="positive">+2 Health</div>
+                <div class="positive"></div>
                 <div class="but">BUT</div>
-                <div class="negative">-2 Tank Speed</div>
+                <div class="negative"></div>
             </div>
         </div>
     </div>
@@ -32,6 +43,8 @@
     </div>
 
     <div id="bars-container"></div>
+    <div id="score" class="visible"></div>
+    <div id="highscore"></div>
 
     <div id="game-container"></div>
 

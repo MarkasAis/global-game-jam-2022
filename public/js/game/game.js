@@ -9,8 +9,9 @@ import Maths from '../math/maths.js';
 
 import Player from './player.js';
 import AssetManager from '../other/assets.js';
-import StatsManager, { Stat, Bar } from './stats.js';
+import GameManager, { Stat, Bar } from './manager.js';
 import Enemy from './enemy.js';
+import ScoreManager from './score.js';
 
 export default class Game {
     static _canvasContainer = null;
@@ -21,10 +22,11 @@ export default class Game {
     static _player = null;
     static _debugMaterial = null;
 
-    static _objects = new Set();
+    static _objects = null;
 
-    static _pauseAnimationTime = 0;
-    static _pauseSpeed = 1;
+    static _spawnCooldown = 0;
+
+    static _firstGame = true;
 
     static RenderLayers = {
         BACKGROUND: -100,
@@ -43,7 +45,7 @@ export default class Game {
     }
 
     static init() {
-        Game._setup().then(Game._start);
+        Game._setup();
     }
 
     static addObject(obj) {
@@ -78,23 +80,22 @@ export default class Game {
 
         Game._crosshairMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('crosshair'), Vec4(1, 1, 1, 1));
         Game._gridMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('grid'));
-        Game._player = Game.addObject(new Player(Vec3(0,0,0)));
 
-        StatsManager.init();
-        StatsManager.defineStat('playerMoveSpeed', new Stat('Player Move Speed', 5, '#84ff57'));
-        StatsManager.defineStat('playerShootRate', new Stat('Player Shoot Rate', 5, '#57ffc8'));
-        StatsManager.defineStat('playerBulletSpeed', new Stat('Player Bullet Speed', 5, '#ff5757'));
-        StatsManager.defineStat('playerBulletDamage', new Stat('Player Bullet Damage', 5, '#ff5757'));
-        StatsManager.defineStat('playerBulletPenetration', new Stat('Player Bullet Penetration', 5, '#ff5757'));
+        GameManager.init();
+        GameManager.defineStat('playerMoveSpeed', new Stat('Move Speed', 5, '#84ff57'));
+        GameManager.defineStat('playerShootRate', new Stat('Shoot Rate', 5, '#57ffc8'));
+        GameManager.defineStat('playerBulletSpeed', new Stat('Bullet Speed', 5, '#ff5757'));
+        GameManager.defineStat('playerBulletDamage', new Stat('Bullet Damage', 5, '#ff5757'));
+        GameManager.defineStat('playerBulletPenetration', new Stat('Bullet Penetration', 5, '#ff5757'));
+        GameManager.defineStat('playerMaxHealth', new Stat('Maximum Health', 5, '#ff5757'));
 
-        StatsManager.defineBar('health', new Bar('Health', 10, Game._player.health, '#8d001f', '#ff0037', function() {
-            if (this.value <= 0) {
+        GameManager.defineBar('health', new Bar('Health', 0, 0, 'var(--secondary-dark)', 'var(--secondary-bright)', function() {
+            if (this.value < 0) {
                 this.setValue(0, false);
-                // alert('u ded lol');
             }
         }));
 
-        StatsManager.defineBar('xp', new Bar('XP', 10, 0, '#425900', '#bf0', function() {
+        GameManager.defineBar('xp', new Bar('XP', 10, 0, 'var(--primary-dark)', 'var(--primary-bright)', function() {
             if (this.value >= this.maxValue) {
                 let prevMaxValue = this.maxValue;
                 this.maxValue = Math.floor(1.1 * this.maxValue);
@@ -102,6 +103,40 @@ export default class Game {
                 Game._onLevelUp();
             }
         }));
+
+        Game.restart();
+        Game._timer.start();
+    }
+
+    static _spawnPlayer() {
+        if (Game._firstGame) {
+            var position = Vec3(0, 0, 0);
+        } else {
+            let { min, max } = Game.getCameraBounds();
+            let center = Vec3.lerp(min, max, 0.5);
+
+            let distance = Vec3.distance(center, max);
+
+            let angle = Maths.random(0, 2*Math.PI);
+            let offset = Vec3(Math.cos(angle) * distance, Math.sin(angle) * distance, 0);
+
+            var position = Vec3.add(center, offset);
+        }
+
+        Game._player = Game.addObject(new Player(position));
+    }
+
+    static restart() {
+        Game._objects = new Set();
+
+        GameManager.reset();
+        ScoreManager.reset();
+
+        Game._spawnPlayer();
+
+        Game._timer.transitionTimescale(1, 1);
+
+        Game._firstGame = false;
     }
 
     static _onResize() {
@@ -109,21 +144,42 @@ export default class Game {
         Game._camera.aspectRatio = Game._canvasContainer.offsetWidth / Game._canvasContainer.offsetHeight;
     }
 
-    static _start() {
-        Game.addObject(new Enemy(Vec3(2, 2, 0)));
-
-        Game._timer.start();
-    }
-
     static _onLevelUp() {
         Game._timer.transitionTimescale(0, 1, () => {
-            StatsManager.upgrade(() => {
+            GameManager.upgrade(() => {
                 Game._timer.transitionTimescale(1, 1);
             });
         });
     }
 
+    static _spawnEnemy() {
+        let { min: minBound, max: maxBound } =  Game.getCameraBounds();
+
+        let width = maxBound[0] - minBound[0];
+        let height = maxBound[1] - minBound[1];
+
+        for (let i = 0; i < 10; i++) {
+            let x = Maths.random(minBound[0] - width, maxBound[0] + width);
+            let y = Maths.random(minBound[1] - height, maxBound[1] + height);
+
+            if (x >= minBound[0] && x <= maxBound[0] && y >= minBound[1] && y <= maxBound[1]) continue;
+
+            let enemy = new Enemy(Vec3(x, y, 0));
+            Game.addObject(enemy);
+            return enemy;
+        }
+
+        return null;
+    }
+
     static _update(dt) {
+        // Spawn enemy
+        Game._spawnCooldown -= dt;
+        if (Game._spawnCooldown <= 0) {
+            Game._spawnCooldown += 1;
+            Game._spawnEnemy();
+        }
+
         for (let obj of Game._objects)
             obj.update(dt);
 
@@ -137,7 +193,12 @@ export default class Game {
 
         // Camera follow
         Game._camera.position = Vec3.lerpClamped(Game._camera.position, Game._player.position, 5 * dt);
-            
+    }
+
+    static finish() {
+        Game._timer.transitionTimescale(0, 1, () => {
+            GameManager.endScreen();
+        });
     }
 
     static getCameraBounds() {
