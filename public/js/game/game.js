@@ -98,21 +98,21 @@ export default class Game {
         Game._gridMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('grid'));
 
         GameManager.init();
-        GameManager.defineStat('playerMoveSpeed', new Stat('Move Speed', true, 3, '#84ff57'));
-        GameManager.defineStat('playerShootRate', new Stat('Shoot Rate', true, 5, '#00dbff'));
-        GameManager.defineStat('playerBulletSpeed', new Stat('Bullet Speed', true, 2, '#ffd500'));
-        GameManager.defineStat('playerBulletDamage', new Stat('Bullet Damage', true, 5, '#ff7300'));
-        GameManager.defineStat('playerBulletPenetration', new Stat('Bullet Penetration', true, 2, '#ff5757'));
-        GameManager.defineStat('playerMaxHealth', new Stat('Maximum Health', true, 6, '#ff0037'));
+        GameManager.defineStat('playerMoveSpeed', new Stat('Move Speed', true, 1, '#84ff57'));
+        GameManager.defineStat('playerShootRate', new Stat('Shoot Rate', true, 1, '#00dbff'));
+        GameManager.defineStat('playerBulletSpeed', new Stat('Bullet Speed', true, 1, '#ffd500'));
+        GameManager.defineStat('playerBulletDamage', new Stat('Bullet Damage', true, 1, '#ff7300'));
+        GameManager.defineStat('playerBulletPenetration', new Stat('Bullet Penetration', true, 1, '#ff5757'));
+        GameManager.defineStat('playerMaxHealth', new Stat('Maximum Health', true, 1, '#ff0037'));
 
-        GameManager.defineStat('enemyMoveSpeed', new Stat('Enemy Move Speed', false, 3, '#84ff57'));
-        GameManager.defineStat('enemyShootRate', new Stat('Enemy Shoot Rate', false, 2, '#00dbff'));
-        GameManager.defineStat('enemyBulletSpeed', new Stat('Enemy Bullet Speed', false, 4, '#ffd500'));
+        GameManager.defineStat('enemyMoveSpeed', new Stat('Enemy Move Speed', false, 1, '#84ff57'));
+        GameManager.defineStat('enemyShootRate', new Stat('Enemy Shoot Rate', false, 1, '#00dbff'));
+        GameManager.defineStat('enemyBulletSpeed', new Stat('Enemy Bullet Speed', false, 1, '#ffd500'));
         GameManager.defineStat('enemyBulletDamage', new Stat('Enemy Bullet Damage', false, 1, '#ff7300'));
-        GameManager.defineStat('enemyMaxHealth', new Stat('Enemy Maximum Health', false, 2, '#ff0037'));
-        GameManager.defineStat('enemyCount', new Stat('Enemy Count', false, 3, '#ffffff'));
+        GameManager.defineStat('enemyMaxHealth', new Stat('Enemy Maximum Health', false, 1, '#ff0037'));
+        GameManager.defineStat('enemyCount', new Stat('Enemy Count', false, 1, '#ffffff'));
 
-        GameManager.defineBar('health', new Bar('Health', 300, 7, 'var(--secondary-transparent)', 'var(--secondary-bright)', function() {
+        GameManager.defineBar('health', new Bar('Health', 0, 0, 'var(--secondary-transparent)', 'var(--secondary-bright)', function() {
             if (this.value < 0) {
                 this.setValue(0, false);
             }
