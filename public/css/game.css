@@ -178,6 +178,7 @@ canvas {
     align-items: center;
     height: 100%;
     margin-left: 20px;
+    padding-top: 2px;
 
     font-size: 23px;
     text-shadow: 1px  1px 1px rgba(0, 0, 0, 0.4),
@@ -187,20 +188,6 @@ canvas {
 }
 
 /* ##################### End Screen ##################### */
-
-/* #end-screen-container::before {
-    content: '';
-    position: s;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    width: 100vw;
-    height: 100vh;
-    transform: translate(-50%, -50%);
-    z-index: -1;
-    background-color: rgb(255, 0, 0);
-} */
 
 #end-screen-buttons {
     display: flex;

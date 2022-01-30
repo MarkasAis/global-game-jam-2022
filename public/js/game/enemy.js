@@ -33,6 +33,11 @@ export default class Enemy extends Tank {
         }
     }
 
+    _onHit(bullet) {
+        super._onHit(bullet);
+        AssetManager.playAudio('hit_enemy', { volume: 0.5 });
+    }
+
     _onDeath() {
         super._onDeath();
         GameManager.setBar('xp', GameManager.getBar('xp').value + 1);

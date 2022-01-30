@@ -4,6 +4,7 @@ import Game from "./game.js";
 import GameManager from "./manager.js";
 
 import Tank from './tank.js';
+import AssetManager from "../other/assets.js";
 
 export default class Player extends Tank {
     constructor(position=Vec3(0,0,0)) {
@@ -14,13 +15,13 @@ export default class Player extends Tank {
         super.update(dt);
 
         // Update stats
-        this._moveSpeed = GameManager.getStat('playerMoveSpeed');
-        this._bulletSpeed = GameManager.getStat('playerBulletSpeed');
+        this._moveSpeed = GameManager.getStat('playerMoveSpeed') + 1;
+        this._bulletSpeed = GameManager.getStat('playerBulletSpeed') + 1;
         this._bulletDamage = GameManager.getStat('playerBulletDamage');
         this._bulletPenetration = GameManager.getStat('playerBulletPenetration')+1;
         this._shootDelay = 1 / (GameManager.getStat('playerShootRate')+1);
 
-        this.maximumHealth = GameManager.getStat('playerMaxHealth');
+        this.maximumHealth = GameManager.getStat('playerMaxHealth') * 2 + 3;
 
         GameManager.setBar('health', this._health, this._maximumHealth);
 
@@ -42,10 +43,16 @@ export default class Player extends Tank {
     _onHit(bullet) {
         super._onHit(bullet);
         GameManager.setBar('health', this._health, this._maximumHealth);
+        AssetManager.playAudio('hit_player', { volume: 1 });
     }
 
     _onDeath() {
         super._onDeath();
         Game.finish();
+    }
+
+    _shoot() {
+        super._shoot();
+        AssetManager.playAudio('shoot', { volume: 0.4 });
     }
 }

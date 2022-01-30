@@ -305,7 +305,7 @@ export default class GameManager {
     }
 
     static _openSelection(options) {
-        if (GameManager._selectionOpen) return;
+        if (GameManager._selectionOpen || GameManager._endScreenOpen) return;
         GameManager._selectionOpen = true;
 
         GameManager._populateOptions(options);
@@ -340,6 +340,8 @@ export default class GameManager {
     static _openEndScreen() {
         if (GameManager._endScreenOpen) return;
         GameManager._endScreenOpen = true;
+
+        GameManager._closeSelection();
 
         GameManager._populateEndScreen();
         GameManager._endScreenContainerElement.classList.add('visible');

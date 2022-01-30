@@ -9,6 +9,9 @@
 
   --primary-dark: #004364;
   --secondary-dark: #550012;
+
+  --primary-transparent: #00aaff23;
+  --secondary-transparent: #ff003723;
 }
 
 html, body {

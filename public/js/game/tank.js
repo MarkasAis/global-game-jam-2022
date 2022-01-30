@@ -17,7 +17,7 @@ export default class Tank extends Collidable {
         this._moveSpeed = 1;
         this._rotationSpeed = 5;
 
-        this._bulletSpeed = 6;
+        this._bulletSpeed = 2;
         this._bulletDamage = 1;
         this._bulletPenetration = 1;
 
@@ -25,7 +25,7 @@ export default class Tank extends Collidable {
         this._shotOffset = 0.5;
         this._shootCooldown = 0;
 
-        this._maximumHealth = 10;
+        this._maximumHealth = 2;
         this._health = this._maximumHealth;
         this._type = type;
 
@@ -92,6 +92,11 @@ export default class Tank extends Collidable {
             Vec3(1, 1, 1), Vec3(0.9, 0.9, 1),
             Maths.easeOutExpo
         ));
+
+        let distance = Vec3.distance(this._position, Game.camera.position);
+        let falloff = 0.2;
+        let volume = 1 / (distance*falloff + 1);
+        AssetManager.playAudio('explosion', { volume });
     }
 
     _move(direction, dt) {

@@ -40,6 +40,7 @@ export default class Game {
 
     static get renderer() { return Game._renderer; }
     static get player() { return Game._player; }
+    static get camera() { return Game._camera; }
     static get mouseWorldPos() {
         return Game._camera.screenToWorldPosition(Input.getMousePosNormalized(Game._renderer.canvas));
     }
@@ -75,36 +76,48 @@ export default class Game {
             AssetManager.loadTexture(Game._renderer.gl, '../images/xp.png')
         ]);
 
+        AssetManager.loadAudio('../sounds/explosion.mp3');
+        AssetManager.loadAudio('../sounds/hit_player.mp3');
+        AssetManager.loadAudio('../sounds/hit_enemy.wav');
+        AssetManager.loadAudio('../sounds/shoot.wav');
+        AssetManager.loadAudio('../sounds/music.mp3');
+        AssetManager.loadAudio('../sounds/level.wav');
+
         Game._camera = new Camera(Game._canvasContainer.offsetWidth / Game._canvasContainer.offsetHeight, 3);
-        Game._timer = new Timer(80, Game._update, Game._render);
+        Game._timer = new Timer(60, Game._update, Game._render);
 
         Game._crosshairMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('crosshair'), Vec4(1, 1, 1, 1));
         Game._gridMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('grid'));
 
         GameManager.init();
-        GameManager.defineStat('playerMoveSpeed', new Stat('Move Speed', 5, '#84ff57'));
-        GameManager.defineStat('playerShootRate', new Stat('Shoot Rate', 5, '#57ffc8'));
-        GameManager.defineStat('playerBulletSpeed', new Stat('Bullet Speed', 5, '#ff5757'));
-        GameManager.defineStat('playerBulletDamage', new Stat('Bullet Damage', 5, '#ff5757'));
-        GameManager.defineStat('playerBulletPenetration', new Stat('Bullet Penetration', 5, '#ff5757'));
-        GameManager.defineStat('playerMaxHealth', new Stat('Maximum Health', 5, '#ff5757'));
+        GameManager.defineStat('playerMoveSpeed', new Stat('Move Speed', 1, '#84ff57'));
+        GameManager.defineStat('playerShootRate', new Stat('Shoot Rate', 1, '#57ffc8'));
+        GameManager.defineStat('playerBulletSpeed', new Stat('Bullet Speed', 1, '#ff5757'));
+        GameManager.defineStat('playerBulletDamage', new Stat('Bullet Damage', 1, '#ff5757'));
+        GameManager.defineStat('playerBulletPenetration', new Stat('Bullet Penetration', 1, '#ff5757'));
+        GameManager.defineStat('playerMaxHealth', new Stat('Maximum Health', 1, '#ff0037'));
 
-        GameManager.defineBar('health', new Bar('Health', 0, 0, 'var(--secondary-dark)', 'var(--secondary-bright)', function() {
+        GameManager.defineBar('health', new Bar('Health', 0, 0, 'var(--secondary-transparent)', 'var(--secondary-bright)', function() {
             if (this.value < 0) {
                 this.setValue(0, false);
             }
         }));
 
-        GameManager.defineBar('xp', new Bar('XP', 10, 0, 'var(--primary-dark)', 'var(--primary-bright)', function() {
+        GameManager.defineBar('xp', new Bar('XP', 3, 0, 'var(--primary-transparent)', 'var(--primary-bright)', function() {
             if (this.value >= this.maxValue) {
                 let prevMaxValue = this.maxValue;
                 this.maxValue = Math.floor(1.1 * this.maxValue);
+                if (this.maxValue == prevMaxValue) this.maxValue++;
+
                 this.setValue(this._value - prevMaxValue, true);
                 Game._onLevelUp();
+                AssetManager.playAudio('level', { volume: 0.5, delay: 1 });
             }
         }));
 
         ScoreManager.init();
+
+        AssetManager.playAudio('music', { volume: 0.5, loop: true, force: true });
 
         Game.restart();
         Game._timer.start();
