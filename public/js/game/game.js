@@ -193,11 +193,12 @@ export default class Game {
         let { min: validMin, max: validMax } =  Game.getActiveBounds();
 
         for (let i = 0; i < 10; i++) {
-            let pos = Vec3.lerp(validMin, validMax, Maths.random(0, 1));
+            let x = Maths.lerp(validMin[0], validMax[0], Maths.random(0, 1));
+            let y = Maths.lerp(validMin[1], validMax[1], Maths.random(0, 1));
 
-            if (pos[0] >= invalidMin[0] && pos[0] <= invalidMax[0] && pos[1] >= invalidMin[1] && pos[1] <= invalidMax[1]) continue;
+            if (x >= invalidMin[0] && x <= invalidMax[0] && y >= invalidMin[1] && y <= invalidMax[1]) continue;
 
-            let enemy = new Enemy(pos);
+            let enemy = new Enemy(Vec3(x, y, 0));
             Game.addObject(enemy);
             return enemy;
         }
@@ -213,7 +214,7 @@ export default class Game {
             }
         }
 
-        while (Game._currentEnemyCount < GameManager.getStat('enemyCount') * 3 + 1)
+        while (Game._currentEnemyCount < GameManager.getStat('enemyCount') * 2 + 1)
             Game._spawnEnemy();
 
         for (let obj of Game._objects)

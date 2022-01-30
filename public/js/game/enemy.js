@@ -12,8 +12,8 @@ export default class Enemy extends Tank {
     constructor(position=Vec3(0,0,0)) {
         super('enemy', position, Maths.random(-2, 2));
 
-        this._moveSpeed = GameManager.getStat('enemyMoveSpeed') + 1;
-        this._bulletSpeed = GameManager.getStat('enemyBulletSpeed') * 2 + 2;
+        this._moveSpeed = GameManager.getStat('enemyMoveSpeed') * 0.5 + 1;
+        this._bulletSpeed = GameManager.getStat('enemyBulletSpeed') * 1 + 2;
         this._bulletDamage = GameManager.getStat('enemyBulletDamage');
         this._shootDelay = 2 / (GameManager.getStat('enemyShootRate'));
         this.maximumHealth = GameManager.getStat('enemyMaxHealth') * 3;
