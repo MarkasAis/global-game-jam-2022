@@ -292,7 +292,7 @@ export default class GameManager {
 
         // n- n+
         else {
-            let maxDecrease = stats[0]-1;
+            let maxDecrease = stats[0].value-1;
             let decrease = Math.round(EXCHANGE_PERCENT * maxDecrease);
 
             let increase = decrease + Maths.randomInt(-1, 1);
