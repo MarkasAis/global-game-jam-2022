@@ -63,8 +63,9 @@ out vec4 o_Color;
 
 void main() {
     vec4 texCol = texture(u_Texture, v_TexCoord);
-    vec3 shiftedCol = hueShift(vec3(texCol.xyz), u_Hue);
+    vec4 tintedCol = texCol * u_Tint;
+    vec3 shiftedCol = hueShift(vec3(tintedCol.xyz), u_Hue);
     vec3 saturatedCol = czm_saturation(shiftedCol, u_Saturation);
-    o_Color = vec4(saturatedCol.xyz, texCol.w) * u_Tint;
+    o_Color = vec4(saturatedCol.xyz, tintedCol.w);
 }
 `;

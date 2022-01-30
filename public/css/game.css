@@ -11,11 +11,6 @@ canvas {
     cursor: none;
 }
 
-.visible {
-    opacity: 100% !important;
-    pointer-events: visible !important;
-}
-
 #selection-container, #end-screen-container {
     position: fixed;
     top: 50%;
@@ -109,29 +104,40 @@ canvas {
 
 /* ##################### Stats ##################### */
 
-#stats-container {
+#stats-container-positive, #stats-container-negative {
     position: fixed;
-    left: 15px;
-    bottom: 15px;
-
     display: flex;
     user-select: none;
     cursor: none;
+    bottom: 15px;
 }
 
-#stat-names-container {
+#stats-container-positive {
+    left: 15px;
+}
+
+#stats-container-negative {
+    right: 15px;
+    flex-flow: row-reverse;
+}
+
+#stats-container-negative .stat-points-container > * > * {
+    float: right;
+}
+
+.stat-names-container {
     color: white;
     font-family: 'pixelated';
     font-size: 20px;
-    margin-right: 20px;
+    margin: 0 20px;
 }
 
-#stat-names-container > div, #stat-points-container > * {
+.stat-names-container > div, .stat-points-container > * {
     margin-bottom: 10px;
     height: 20px;
 }
 
-#stat-points-container > * > * {
+.stat-points-container > * > * {
     width: 20px;
     height: 20px;
     background-color: white;
@@ -265,4 +271,21 @@ canvas {
     font-size: 40px;
 
     z-index: 101;
+}
+
+#blank {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: white;
+    z-index: 200;
+
+    transition: opacity 0.5s;
+}
+
+.invisible {
+    opacity: 0;
+    pointer-events: none;
 }

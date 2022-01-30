@@ -12,6 +12,12 @@ export default class Enemy extends Tank {
     constructor(position=Vec3(0,0,0)) {
         super('enemy', position, Maths.random(-2, 2));
 
+        this._moveSpeed = GameManager.getStat('enemyMoveSpeed') + 1;
+        this._bulletSpeed = GameManager.getStat('enemyBulletSpeed') * 2 + 2;
+        this._bulletDamage = GameManager.getStat('enemyBulletDamage');
+        this._shootDelay = 2 / (GameManager.getStat('enemyShootRate'));
+        this.maximumHealth = GameManager.getStat('enemyMaxHealth') * 3;
+
         this._seesPlayer = true;
         this._followRange = 2;
     }
@@ -25,12 +31,14 @@ export default class Enemy extends Tank {
             let targetPosition = Vec3.add(Game.player.position, offset);
 
             let direction = Vec3.subtract(targetPosition, this._position);
-            if (Vec3.squareMagnitude(direction) >= this._moveSpeed*this._moveSpeed)
+            if (Vec3.squareMagnitude(direction) >= this._moveSpeed*this._moveSpeed * dt*dt)
                 this._move(direction, dt);
 
             this._faceTowards(Game.player.position);
             this._attemptShoot();
         }
+
+        if (Game.isOutOfBounds(this._position)) Game.removeObject(this);
     }
 
     _onHit(bullet) {
@@ -40,8 +48,8 @@ export default class Enemy extends Tank {
 
     _onDeath() {
         super._onDeath();
-        GameManager.setBar('xp', GameManager.getBar('xp').value + 1);
-        ScoreManager.increaseScore(1);
+        GameManager.setBar('xp', GameManager.getBar('xp').value + this._maximumHealth);
+        ScoreManager.increaseScore(this._maximumHealth);
 
         Game.addObject(new Particle(
             new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('xp'), Vec4(1, 1, 1, 1)),

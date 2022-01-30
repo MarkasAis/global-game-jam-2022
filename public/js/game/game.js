@@ -24,12 +24,15 @@ export default class Game {
 
     static _objects = null;
 
-    static _spawnCooldown = 0;
+    static _currentEnemyCount = 0;
 
     static _firstGame = true;
+    static _waitingToStart = true;
+    static _isFinished = false;
 
     static RenderLayers = {
         BACKGROUND: -100,
+        GROUND: -1,
         SHADOW: 0,
         DEAD: 1,
         TANK_BASE: 2,
@@ -51,11 +54,14 @@ export default class Game {
 
     static addObject(obj) {
         Game._objects.add(obj);
+        if (obj instanceof Enemy) Game._currentEnemyCount++;
         return obj;
     }
 
     static removeObject(obj) {
-        return Game._objects.delete(obj);
+        let deleted = Game._objects.delete(obj);
+        if (deleted && obj instanceof Enemy) Game._currentEnemyCount--;
+        return deleted;
     }
 
     static async _setup() {
@@ -73,7 +79,8 @@ export default class Game {
             AssetManager.loadTexture(Game._renderer.gl, '../images/tank_top.png'),
             AssetManager.loadTexture(Game._renderer.gl, '../images/crosshair.png'),
             AssetManager.loadTexture(Game._renderer.gl, '../images/grid.png'),
-            AssetManager.loadTexture(Game._renderer.gl, '../images/xp.png')
+            AssetManager.loadTexture(Game._renderer.gl, '../images/xp.png'),
+            AssetManager.loadTexture(Game._renderer.gl, '../images/controls.png')
         ]);
 
         AssetManager.loadAudio('../sounds/explosion.mp3');
@@ -84,18 +91,26 @@ export default class Game {
         AssetManager.loadAudio('../sounds/level.wav');
 
         Game._camera = new Camera(Game._canvasContainer.offsetWidth / Game._canvasContainer.offsetHeight, 3);
-        Game._timer = new Timer(60, Game._update, Game._render);
+        Game._timer = new Timer(60, Game._update, Game._render, 0);
 
         Game._crosshairMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('crosshair'), Vec4(1, 1, 1, 1));
+        Game._controlsMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('controls'), Vec4(1, 1, 1, 0.3));
         Game._gridMaterial = new BasicMaterial(Game._renderer.gl, AssetManager.getTexture('grid'));
 
         GameManager.init();
-        GameManager.defineStat('playerMoveSpeed', new Stat('Move Speed', 1, '#84ff57'));
-        GameManager.defineStat('playerShootRate', new Stat('Shoot Rate', 1, '#57ffc8'));
-        GameManager.defineStat('playerBulletSpeed', new Stat('Bullet Speed', 1, '#ff5757'));
-        GameManager.defineStat('playerBulletDamage', new Stat('Bullet Damage', 1, '#ff5757'));
-        GameManager.defineStat('playerBulletPenetration', new Stat('Bullet Penetration', 1, '#ff5757'));
-        GameManager.defineStat('playerMaxHealth', new Stat('Maximum Health', 1, '#ff0037'));
+        GameManager.defineStat('playerMoveSpeed', new Stat('Move Speed', true, 1, '#84ff57'));
+        GameManager.defineStat('playerShootRate', new Stat('Shoot Rate', true, 1, '#00dbff'));
+        GameManager.defineStat('playerBulletSpeed', new Stat('Bullet Speed', true, 1, '#ffd500'));
+        GameManager.defineStat('playerBulletDamage', new Stat('Bullet Damage', true, 1, '#ff7300'));
+        GameManager.defineStat('playerBulletPenetration', new Stat('Bullet Penetration', true, 1, '#ff5757'));
+        GameManager.defineStat('playerMaxHealth', new Stat('Maximum Health', true, 1, '#ff0037'));
+
+        GameManager.defineStat('enemyMoveSpeed', new Stat('Enemy Move Speed', false, 1, '#84ff57'));
+        GameManager.defineStat('enemyShootRate', new Stat('Enemy Shoot Rate', false, 1, '#00dbff'));
+        GameManager.defineStat('enemyBulletSpeed', new Stat('Enemy Bullet Speed', false, 1, '#ffd500'));
+        GameManager.defineStat('enemyBulletDamage', new Stat('Enemy Bullet Damage', false, 1, '#ff7300'));
+        GameManager.defineStat('enemyMaxHealth', new Stat('Enemy Maximum Health', false, 1, '#ff0037'));
+        GameManager.defineStat('enemyCount', new Stat('Enemy Count', false, 1, '#ffffff'));
 
         GameManager.defineBar('health', new Bar('Health', 0, 0, 'var(--secondary-transparent)', 'var(--secondary-bright)', function() {
             if (this.value < 0) {
@@ -103,10 +118,10 @@ export default class Game {
             }
         }));
 
-        GameManager.defineBar('xp', new Bar('XP', 3, 0, 'var(--primary-transparent)', 'var(--primary-bright)', function() {
+        GameManager.defineBar('xp', new Bar('XP', 6, 0, 'var(--primary-transparent)', 'var(--primary-bright)', function() {
             if (this.value >= this.maxValue) {
                 let prevMaxValue = this.maxValue;
-                this.maxValue = Math.floor(1.1 * this.maxValue);
+                this.maxValue = Math.floor(1.2 * this.maxValue + 2);
                 if (this.maxValue == prevMaxValue) this.maxValue++;
 
                 this.setValue(this._value - prevMaxValue, true);
@@ -118,6 +133,8 @@ export default class Game {
         ScoreManager.init();
 
         AssetManager.playAudio('music', { volume: 0.5, loop: true, force: true });
+
+        GameManager.hideBlank();
 
         Game.restart();
         Game._timer.start();
@@ -143,15 +160,17 @@ export default class Game {
 
     static restart() {
         Game._objects = new Set();
+        Game._currentEnemyCount = 0;
+        Game._isFinished = false;
 
         GameManager.reset();
         ScoreManager.reset();
 
         Game._spawnPlayer();
-
-        Game._timer.transitionTimescale(1, 1);
-
         Game._firstGame = false;
+
+        if (!Game._waitingToStart)
+            Game._timer.transitionTimescale(1, 1);
     }
 
     static _onResize() {
@@ -160,6 +179,8 @@ export default class Game {
     }
 
     static _onLevelUp() {
+        if (Game._isFinished) return;
+
         Game._timer.transitionTimescale(0, 1, () => {
             GameManager.upgrade(() => {
                 Game._timer.transitionTimescale(1, 1);
@@ -168,18 +189,15 @@ export default class Game {
     }
 
     static _spawnEnemy() {
-        let { min: minBound, max: maxBound } =  Game.getCameraBounds();
-
-        let width = maxBound[0] - minBound[0];
-        let height = maxBound[1] - minBound[1];
+        let { min: invalidMin, max: invalidMax } =  Game.getCameraBounds();
+        let { min: validMin, max: validMax } =  Game.getActiveBounds();
 
         for (let i = 0; i < 10; i++) {
-            let x = Maths.random(minBound[0] - width, maxBound[0] + width);
-            let y = Maths.random(minBound[1] - height, maxBound[1] + height);
+            let pos = Vec3.lerp(validMin, validMax, Maths.random(0, 1));
 
-            if (x >= minBound[0] && x <= maxBound[0] && y >= minBound[1] && y <= maxBound[1]) continue;
+            if (pos[0] >= invalidMin[0] && pos[0] <= invalidMax[0] && pos[1] >= invalidMin[1] && pos[1] <= invalidMax[1]) continue;
 
-            let enemy = new Enemy(Vec3(x, y, 0));
+            let enemy = new Enemy(pos);
             Game.addObject(enemy);
             return enemy;
         }
@@ -188,12 +206,15 @@ export default class Game {
     }
 
     static _update(dt) {
-        // Spawn enemy
-        Game._spawnCooldown -= dt;
-        if (Game._spawnCooldown <= 0) {
-            Game._spawnCooldown += 1;
-            Game._spawnEnemy();
+        if (Game._waitingToStart) {
+            if (Input.getKey('w') || Input.getKey('a') || Input.getKey('s') || Input.getKey('d') || Input.getMouseButton(Input.MouseButton.LEFT)) {
+                Game._timer.transitionTimescale(1, 0);
+                Game._waitingToStart = false;
+            }
         }
+
+        while (Game._currentEnemyCount < GameManager.getStat('enemyCount') * 3 + 1)
+            Game._spawnEnemy();
 
         for (let obj of Game._objects)
             obj.update(dt);
@@ -211,6 +232,7 @@ export default class Game {
     }
 
     static finish() {
+        Game._isFinished = true;
         Game._timer.transitionTimescale(0, 1, () => {
             GameManager.endScreen();
         });
@@ -221,6 +243,24 @@ export default class Game {
             min: Game._camera.screenToWorldPosition(Vec2(-1, -1)),
             max: Game._camera.screenToWorldPosition(Vec2(1, 1))
         }
+    }
+
+    static getActiveBounds() {
+        let { min: minBound, max: maxBound } =  Game.getCameraBounds();
+
+        let width = (maxBound[0] - minBound[0]) / 2;
+        let height = (maxBound[1] - minBound[1]) / 2;
+
+        return {
+            min: Vec3(minBound[0] - width, minBound[1] - height, 0),
+            max: Vec3(maxBound[0] + width, maxBound[1] + height, 0)
+        };
+    }
+
+    static isOutOfBounds(position) {
+        let { min, max } = Game.getActiveBounds();
+        return position[0] < min[0] || position[0] > max[0] ||
+               position[1] < min[1] || position[1] > max[1];
     }
 
     static _render() {
@@ -245,6 +285,8 @@ export default class Game {
                 Game._renderer.drawQuad(Game._gridMaterial, Vec3(x, y, 0), 0, Vec3(tileSize, tileSize, 1), Game.RenderLayers.BACKGROUND);
             }
         }
+
+        Game._renderer.drawQuad(Game._controlsMaterial, Vec3(0, 1, 0), 0, Vec3(3, 3, 1), Game.RenderLayers.GROUND);
 
         for (let obj of Game._objects)
             obj.render();

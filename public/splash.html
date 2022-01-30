@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Would you Rather? (But it's TANKS)</title>
+
+    <link rel="stylesheet" href="css/splash.css">
+</head>
+<body>
+    <div id="main-container">
+        <div id="left-container">
+            <div id="buttons-container" class="fade-init">
+                <button id="play-button">Play</button>
+                <button id="rules-button">Read Rules</button>
+                <button id="stats-button">Statistics</button>
+            </div>
+
+            <div id="rules-container" class="fadeable">
+                <div id="rules">
+                    <div>Use WASD to MOVE</div>
+                    <div>You the LEFT mouse button to SHOOT</div>
+                    <div>Kill enemies to LEVEL UP</div>
+                </div>
+            </div>
+
+            <div id="stats-container" class="fadeable">
+                <div id="stats">
+                    <div>
+                        <div>Highscore:</div>
+                        <div id="highscore">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="close-button" class="close fadeable">
+                <div class="close-lr"></div>
+                <div class="close-rl"></div>
+            </button>
+        </div>
+        <div id="right-container">
+            <div id="right-background"></div>
+            <div id="right-content">
+                <div id="title">Would you Rather?</div>
+                <div id="subtitle">(But it's TANKS)</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/menu.js"></script>
+</body>
+</html>

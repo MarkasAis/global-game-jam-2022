@@ -29,6 +29,8 @@ export default class Tank extends Collidable {
         this._health = this._maximumHealth;
         this._type = type;
 
+        this._size = 1;
+
         this._shadowMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('circle'), Vec4(0, 0, 0, 0.5));
         this._baseMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('tank_base'), Vec4(1, 1, 1, 1), hue, 2);
         this._topMaterial = new BasicMaterial(Game.renderer.gl, AssetManager.getTexture('tank_top'), Vec4(1, 1, 1, 1), hue, 2);
@@ -46,12 +48,14 @@ export default class Tank extends Collidable {
 
     update(dt) {
         this._shootCooldown -= dt;
+        this._radius = 0.35 + this._maximumHealth / 20;
+        this._size = 1 + this._maximumHealth / 20;
     }
 
     render() {
-        Game.renderer.drawQuad(this._shadowMaterial, this._position, 0, Vec3(0.7, 0.7, 1), Game.RenderLayers.SHADOW);
-        Game.renderer.drawQuad(this._baseMaterial, this._position, this._baseRotation, Vec3(1, 1, 1), Game.RenderLayers.TANK_BASE);
-        Game.renderer.drawQuad(this._topMaterial, this._position, this._topRotation, Vec3(1, 1, 1), Game.RenderLayers.TANK_TOP);
+        Game.renderer.drawQuad(this._shadowMaterial, this._position, 0, Vec3(0.7*this._size, 0.7*this._size, 1), Game.RenderLayers.SHADOW);
+        Game.renderer.drawQuad(this._baseMaterial, this._position, this._baseRotation, Vec3(this._size, this._size, 1), Game.RenderLayers.TANK_BASE);
+        Game.renderer.drawQuad(this._topMaterial, this._position, this._topRotation, Vec3(this._size, this._size, 1), Game.RenderLayers.TANK_TOP);
     }
 
     _onCollision(other) {
@@ -80,7 +84,7 @@ export default class Tank extends Collidable {
             Game.RenderLayers.DEAD, 1, 5,
             Vec3.clone(this._position), Vec3.add(this._position, randomOffset(0.5)),
             this._topRotation, this._topRotation + Maths.random(-Math.PI, Math.PI),
-            Vec3(1, 1, 1), Vec3(1, 1, 1),
+            Vec3(this._size, this._size, 1), Vec3(this._size, this._size, 1),
             Maths.easeOutExpo
         ));
 
@@ -89,7 +93,7 @@ export default class Tank extends Collidable {
             Game.RenderLayers.DEAD, 1, 5,
             Vec3.clone(this._position), Vec3.add(this._position, randomOffset(1)),
             this._topRotation, this._topRotation + Maths.random(-Math.PI, Math.PI),
-            Vec3(1, 1, 1), Vec3(0.9, 0.9, 1),
+            Vec3(this._size, this._size, 1), Vec3(0.9*this._size, 0.9*this._size, 1),
             Maths.easeOutExpo
         ));
 
@@ -122,7 +126,7 @@ export default class Tank extends Collidable {
 
     _shoot() {
         let direction = Vec3.normalize(Vec3(Math.cos(this._topRotation), Math.sin(this._topRotation), 0));
-        let offset = Vec3.multiply(direction, this._shotOffset);
+        let offset = Vec3.multiply(direction, this._shotOffset * this._size);
         let shotPosition = Vec3.add(this._position, offset);
 
         Game.addObject(new Bullet(this._type, this._bulletDamage, this._bulletPenetration, shotPosition, this._topRotation, this._bulletSpeed));

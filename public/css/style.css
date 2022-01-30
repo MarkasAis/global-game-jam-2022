@@ -14,7 +14,60 @@
   --secondary-transparent: #ff003723;
 }
 
+* {
+  font-family: 'pixelated';
+}
+
 html, body {
   margin: 0;
   background-color: #151515;
+}
+
+.visible {
+  opacity: 100% !important;
+  pointer-events: visible !important;
+  visibility: visible !important;
+}
+
+/* https://codepen.io/rsbear/pen/ZpXJVp */
+.close {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border: none;
+  background: none;
+}
+
+.close:hover {
+  background: none;
+}
+
+.close-lr {
+  height: 4px;
+  width: 50px;
+  position: absolute;
+  background-color: white;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  transition: all .2s ease-in;
+}
+
+.close-rl {
+  height: 4px;
+  width: 50px;
+  position: absolute;
+  background-color: white;
+  border-radius: 2px;
+  transform: rotate(-45deg);
+  transition: all .2s ease-in;
+}
+
+.close:hover .close-lr{
+  transform: rotate(-45deg);
+  background-color: var(--secondary-bright);
+}
+
+.close:hover .close-rl{
+  transform: rotate(45deg);
+  background-color: var(--secondary-bright);
 }

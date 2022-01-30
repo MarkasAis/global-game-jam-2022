@@ -6,7 +6,7 @@ export default class Maths {
     // Adapted from: https://stackoverflow.com/a/1527820/16787998
     static randomInt(min, max) {
         min = Math.ceil(min);
-        max = Math.floor(max) + 1;
+        max = Math.floor(max);
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 

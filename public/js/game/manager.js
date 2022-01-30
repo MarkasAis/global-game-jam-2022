@@ -4,13 +4,15 @@ import Game from "./game.js";
 import ScoreManager from "./score.js";
 
 export class Stat {
-    constructor(name, startingValue, color) {
+    constructor(name, positive, startingValue, color) {
         this._name = name;
+        this._positive = positive;
         this._startingValue = startingValue;
         this._value = startingValue;
         this._color = color;
     }
 
+    get positive() { return this._positive; }
     get value() { return this._value; }
     set value(v) {
         this._value = Math.max(v, 0);
@@ -24,7 +26,7 @@ export class Stat {
     }
 
     changeMessage(value) {
-        return value + ' ' + this._name;
+        return `${value < 0 ? '-' : '+'}${Math.abs(value)} ${this._name}`;
     }
 }
 
@@ -76,8 +78,8 @@ export default class GameManager {
     static _selectionOpen = false;
 
     // Stats
-    static _statNamesContainerElement = null;
-    static _statPointsContainer = null;
+    static _statNamesContainerElements = null;
+    static _statPointsContainerElements = null;
 
     static _stats = {};
     static _statPointsElements = {};
@@ -99,6 +101,7 @@ export default class GameManager {
 
     // Other
     static _overlayElement = null;
+    static _blankElement = null;
     static _closeCallback = null;
 
     static init() {
@@ -119,8 +122,18 @@ export default class GameManager {
         }
 
         // Stats
-        GameManager._statNamesContainerElement = document.getElementById('stat-names-container');
-        GameManager._statPointsContainer = document.getElementById('stat-points-container');
+        let positiveContainer = document.getElementById('stats-container-positive');
+        let negativeContainer = document.getElementById('stats-container-negative');
+
+        GameManager._statNamesContainerElements = {
+            positive: positiveContainer.getElementsByClassName('stat-names-container')[0],
+            negative: negativeContainer.getElementsByClassName('stat-names-container')[0]
+        };
+        
+        GameManager._statPointsContainerElements = {
+            positive: positiveContainer.getElementsByClassName('stat-points-container')[0],
+            negative: negativeContainer.getElementsByClassName('stat-points-container')[0]
+        };
 
         // Bars
         GameManager._barsContainerElement = document.getElementById('bars-container');
@@ -131,14 +144,13 @@ export default class GameManager {
         let playAgain = document.getElementById('play-again');
         playAgain.onclick = () => {
             GameManager._closeEndScreen();
-            console.log('play again');
             Game.restart();
         }
 
         let mainMenu = document.getElementById('main-menu');
         mainMenu.onclick = () => {
             GameManager._closeEndScreen();
-            console.log('main menu');
+            window.location.replace('../');
         }
 
         // Score
@@ -147,6 +159,7 @@ export default class GameManager {
 
         // Other
         GameManager._overlayElement = document.getElementById('overlay');
+        GameManager._blankElement = document.getElementById('blank');
     }
 
     static reset() {
@@ -177,11 +190,17 @@ export default class GameManager {
 
         let nameElement = document.createElement('div');
         nameElement.innerHTML = stat.name;
-        GameManager._statNamesContainerElement.appendChild(nameElement);
-
+        
         let pointsElement = document.createElement('div');
         this._statPointsElements[name] = pointsElement;
-        GameManager._statPointsContainer.appendChild(pointsElement);
+
+        if (stat.positive) {
+            GameManager._statNamesContainerElements.positive.appendChild(nameElement);
+            GameManager._statPointsContainerElements.positive.appendChild(pointsElement);
+        } else {
+            GameManager._statNamesContainerElements.negative.appendChild(nameElement);
+            GameManager._statPointsContainerElements.negative.appendChild(pointsElement);
+        }
 
         GameManager._changeStat(name);
     }
@@ -224,33 +243,89 @@ export default class GameManager {
         GameManager._openEndScreen();
     }
 
-    static _choseUpgradeOptions(expectedIncrease) {
-        const generateExchange = (positive, negative) => {
-            let decrease = Math.round(negative * Maths.random(0.1, 0.5));
-            let increase = decrease;
+    static _generateRandomExchage() {
+        const MAX_DECREASE = 2;
+        const MAX_INCREASE = 2;
 
-            decrease = Maths.clamp(decrease + Maths.randomInt(-1, 1), 0, negative);
-            increase += Maths.randomInt(-1, 1);
+        const EXCHANGE_PERCENT = 0.3;
 
-            return [ increase, -decrease ];
+        let pair = Utils.randomSample(Object.entries(GameManager._stats), 2);
+
+        for (let i = 0; i < 2; i++)
+            if (pair[0][1].positive || pair[1][1].positive)
+                pair = Utils.randomSample(Object.entries(GameManager._stats), 2);
+
+        let names = [ pair[0][0], pair[1][0] ];
+        let stats = [ pair[0][1], pair[1][1] ];
+        let changes = [0, 0];
+
+        // p+ p-
+        if (stats[0].positive && stats[1].positive) {
+            let maxDecrease = stats[1].value-1;
+            let decrease = Math.round(EXCHANGE_PERCENT * maxDecrease);
+            decrease = Math.min(Math.max(1, decrease), maxDecrease);
+
+            let increase = decrease + Maths.randomInt(-1, 1);
+            if (stats[0] + increase < 1) increase++;
+
+            changes[0] = increase;
+            changes[1] = -decrease;
+        }
+        
+        // p+ n+
+        else if (stats[0].positive && !stats[1].positive) {
+            changes[0] = MAX_INCREASE;
+            changes[1] = MAX_INCREASE;
         }
 
-        let stats = Object.entries(GameManager._stats);
-        let option1 = Utils.randomSample(stats, 2);
-        let option2 = Utils.randomSample(stats, 2);
+        // n- p-
+        else if (!stats[0].positive && stats[1].positive) {
+            let maxDecrease = Math.min(stats[0].value, stats[1].value)-1;
+            let decreasePositive =  Math.round(EXCHANGE_PERCENT * maxDecrease);
 
-        let exchange1 = generateExchange(option1[0][1].value, option1[1][1].value);
-        let exchange2 = generateExchange(option2[0][1].value, option2[1][1].value);
+            let decreaseNegative = decreasePositive + Maths.randomInt(-1, 1);
+            if (stats[0] - decreaseNegative < 1) decreaseNegative--;
 
-        let selection1 = {};
-        selection1[option1[0][0]] = exchange1[0];
-        selection1[option1[1][0]] = exchange1[1];
+            changes[0] = -decreaseNegative;
+            changes[1] = -decreasePositive;
+        }
 
-        let selection2 = {};
-        selection2[option2[0][0]] = exchange2[0];
-        selection2[option2[1][0]] = exchange2[1];
+        // n- n+
+        else {
+            let maxDecrease = stats[0]-1;
+            let decrease = Math.round(EXCHANGE_PERCENT * maxDecrease);
 
-        return [ selection1, selection2 ];
+            let increase = decrease + Maths.randomInt(-1, 1);
+            if (stats[1] + increase < 1) increase++;
+
+            changes[0] = -decrease;
+            changes[1] = increase;
+        }
+
+
+        let exchange = {};
+        exchange[names[0]] = changes[0];
+        exchange[names[1]] = changes[1];
+
+        return exchange;
+    }
+
+    static _generateGoodExchange() {
+        while (true) {
+            let exchange = GameManager._generateRandomExchage();
+            let changes = Object.values(exchange);
+            if (changes[0] == 0 || changes[1] == 0) continue;
+            if (changes[0] == NaN || changes[1] == NaN) continue;
+
+            return exchange;
+        }
+    }
+
+    static _choseUpgradeOptions(expectedIncrease) {
+        let exchange1 = GameManager._generateGoodExchange();
+        let exchange2 = GameManager._generateGoodExchange();
+
+        return [ exchange1, exchange2 ];
     }
 
     static _changeStat(name, change=0) {
@@ -291,10 +366,10 @@ export default class GameManager {
             let stats = Object.entries(options[i]);
 
             GameManager._selectionOptionElements[i].onclick = () => {
+                GameManager._closeSelection();
+
                 for (let [name, value] of stats)
                     GameManager._changeStat(name, value);
-
-                GameManager._closeSelection();
             };
 
             for (let j = 0; j < 2; j++) {
@@ -356,5 +431,9 @@ export default class GameManager {
         GameManager._endScreenContainerElement.classList.remove('visible');
         GameManager._overlayElement.classList.remove('visible');
         GameManager._scoreElement.classList.add('visible');
+    }
+
+    static hideBlank() {
+        GameManager._blankElement.classList.add('invisible');
     }
 }

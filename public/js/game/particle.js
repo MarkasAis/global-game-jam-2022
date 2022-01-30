@@ -42,6 +42,8 @@ export default class Particle extends Collidable {
         let life = Maths.clamp(this._t / this._lifespan, 0, 1);
         if (life >= 1) Game.removeObject(this);
         this._material.tint = Vec4(1, 1, 1, 1-life);
+
+        if (Game.isOutOfBounds(this._position)) Game.removeObject(this);
     }
 
     render() {
