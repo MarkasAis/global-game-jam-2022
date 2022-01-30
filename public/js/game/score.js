@@ -9,6 +9,10 @@ export default class ScoreManager {
     static get highscore() { return this._highscore; }
     static get isNewHighscore() { return this._newHighscore; }
 
+    static init() {
+        this._highscore = localStorage.getItem('highscore') || 0;
+    }
+
     static reset() {
         this._score = 0;
         this._newHighscore = false;
@@ -20,6 +24,7 @@ export default class ScoreManager {
         if (this._score > this._highscore) {
             this._highscore = this._score;
             this._newHighscore = true;
+            localStorage.setItem('highscore', this._highscore);
             GameManager.updateHighscore(this._highscore);
         }
 

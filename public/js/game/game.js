@@ -104,6 +104,8 @@ export default class Game {
             }
         }));
 
+        ScoreManager.init();
+
         Game.restart();
         Game._timer.start();
     }
