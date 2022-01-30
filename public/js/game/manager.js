@@ -26,7 +26,7 @@ export class Stat {
     }
 
     changeMessage(value) {
-        return `${value < 0 ? '-' : '+'}${Math.abs(value)} ${this._name}`;
+        return `${value < 0 ? '' : '+'}${value} ${this._name}`;
     }
 }
 

@@ -103,6 +103,7 @@ button:active {
 #right-container {
     grid-column: right-start / right-end;
     position: relative;
+    background-color: white;
 }
 
 #right-background, #right-content {
@@ -114,8 +115,10 @@ button:active {
 }
 
 #right-background {
-    background-color: white;
-    filter: blur(2px) brightness(105%);
+    background: url('../images/logo.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
 }
 
 #right-content {
