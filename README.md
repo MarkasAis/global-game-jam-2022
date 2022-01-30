@@ -1,13 +1,13 @@
 # ![logo](https://user-images.githubusercontent.com/39225800/151721743-639be7b6-8092-4f3f-831b-a86dc7fdc62d.png) Would you Rather? But with TANKS 
 
-A game I made in 48 hours as part of ![Global Game Jam 2022](https://globalgamejam.org/), with the theme **Duality**.
+A game I made in 48 hours as part of [Global Game Jam 2022](https://globalgamejam.org/), with the theme **Duality**.
 
-### :joystick: ![Play in the Browser](https://tank-game-ggj2022.herokuapp.com/)
+### :joystick: [Play in the Browser](https://tank-game-ggj2022.herokuapp.com/)
 
 ## Description
 
-This game combines elements of the popular game *"Would you Rather?"* with the mechanics of a Top-Down shooter.  
-You must kill enemies in order to upgrade your character, but every ***"upgrade"*** to your character comes with a **consequence**.  
+This game combines elements of the popular game *"Would you Rather?"* with the mechanics of a Top-Down shooter.
+You must kill enemies in order to upgrade your character, but every ***"upgrade"*** to your character comes with a **consequence**.
 You must chose what consequences you can survive as you upgrade your Tank in the goal of lasting in the harsh world.
 
 ## :film_strip: Trailer
@@ -27,3 +27,7 @@ You must chose what consequences you can survive as you upgrade your Tank in the
 - Made without using a game engine
 - Implements WebGL2 rendering
 - Uses NodeJS backend
+
+## Credits
+
+- Music by *Rob0neMusic*
