@@ -310,22 +310,30 @@ export default class GameManager {
         return exchange;
     }
 
-    static _generateGoodExchange() {
+    static _generateGoodExchanges() {
         while (true) {
-            let exchange = GameManager._generateRandomExchage();
-            let changes = Object.values(exchange);
-            if (changes[0] == 0 || changes[1] == 0) continue;
-            if (changes[0] == NaN || changes[1] == NaN) continue;
+            let exchange1 = GameManager._generateRandomExchage();
+            let exchange2 = GameManager._generateRandomExchage();
 
-            return exchange;
+            // No 0 value changes
+            let changes1 = Object.values(exchange1);
+            let changes2 = Object.values(exchange2);
+            
+            if (changes1[0] == 0 || changes1[1] == 0) continue;
+            if (changes2[0] == 0 || changes2[1] == 0) continue;
+
+            // No same stat exchanges
+            let stats1 = Object.keys(exchange1);
+            let stats2 = Object.keys(exchange2);
+
+            if (stats1[0] == stats2[0] && stats1[1] == stats2[1]) continue;
+
+            return [ exchange1, exchange2 ];
         }
     }
 
     static _choseUpgradeOptions(expectedIncrease) {
-        let exchange1 = GameManager._generateGoodExchange();
-        let exchange2 = GameManager._generateGoodExchange();
-
-        return [ exchange1, exchange2 ];
+        return GameManager._generateGoodExchanges();
     }
 
     static _changeStat(name, change=0) {
